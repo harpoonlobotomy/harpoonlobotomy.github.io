@@ -1,7 +1,7 @@
 ---
 title: Virtual Texture Normals - fixed!
 date: 2025-06-30
-layout: posts
+layout: post
 categories: Materials
 ---
 
@@ -31,7 +31,7 @@ Now connect the Alpha of the Normal image texture to the Red of Combine Color.
 
 
 
-I'll put a nodegroup
+I'll put a nodegroup up here later on once I've figured out the best way to share them; maybe just a .blend once I've gotten a nice little hoard of fix-groups like this. 
 
 Hope this is helpful to someone out here.
 
