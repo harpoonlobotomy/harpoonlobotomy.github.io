@@ -5,17 +5,5 @@ baseurl: ""
 
 theme: minima
 
-collections:
-  fieldnotes:
-    output: true
-    permalink: /:title/
-
-defaults:
-  - scope:
-      path: ""
-      type: fieldnotes
-    values:
-      layout: fieldnote
-
 show_downloads: false
 google_analytics: ""
