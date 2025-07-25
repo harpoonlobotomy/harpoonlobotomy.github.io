@@ -11,7 +11,7 @@ categories:
 
 I'm not sure how well-known this is, but:
 
-LSMG files can be used to recreate the nodetrees that all Material LSF files use as templates.
+** LSMG files can be used to recreate the nodetrees that all Material LSF files use as templates.**
 
 [The following are all my on observations; I don't have any Larian contacts or insider info, I was just curious and it was a fun mystery.]
 
@@ -31,7 +31,7 @@ That node tree can then be used as the template for a material, as it has all th
 This post could be longer, but I've been distracted building a complete set of scripts that will take a raw LSMG file and produce a JSON that Blender can reliably use to recreate nodegroups.
 It's all routed through a wrapper script, so even though there are 5 scripts involved, the wrapper gets from raw>final by itself. I've added these scripts (and the companion files required to make it ready for blender-integration later) to the distro.
 
-Also as a sideline - LSMG files are funtionally UE4 material nodegraphs. So perhaps I could use this to import UE4 materials into blender, far more broadly than just BG3.  Just a thought. UE4>Blender pipeline, perhaps?
+Also as a sideline - LSMG files are functionally UE4 material nodegraphs. So perhaps I could use this to import UE4 materials into blender, far more broadly than just BG3.  Just a thought. UE4>Blender pipeline, perhaps?
 
 Hope this is helpful to someone out here.
 
