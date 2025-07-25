@@ -1,14 +1,13 @@
-# CLI version
+## use stage-1 parsed txt from LSMG and rebuild JSON output to include internal connections.
+### now includes far more d1p2 attributes, removed separate isColor, retained Location.
+
 import re
 import json
 import sys
+import html
 
-if len(sys.argv) < 2:
-    print("Usage: python parse_blocks.py input.txt [output.json]")
-    sys.exit(1)
-
-input_path = sys.argv[1]
-output_path = sys.argv[2] if len(sys.argv) > 2 else None
+#input_path = "F:\Python_Scripts\LSMG_scripts\BG3_ParsedMaterials\json\Characters\CHAR_Fur.txt"
+#output_path = "F:\Test\Test_Parse_CHAR_Fur_d121_test_2.json"
 
 def parse_attr(tag_line):
     return dict(re.findall(r'(\w+:\w+|\w+)="([^"]+)"', tag_line))
@@ -37,8 +36,6 @@ def extract_blocks_from_file(filepath):
             elif "<d3p1:y>" in line:
                 node_location["Y"] = float(re.sub(r"<.*?>", "", line).strip())
 
-
-
     if current_type and current_block:
         blocks.append((current_type, current_block))
 
@@ -63,8 +60,11 @@ def parse_blocks(blocks):
             m_inputs_size = None
             m_outputs_id = None
             m_outputs_size = None
+            internal_connectors = []
+            d2p1_attr = {}
 
             for line in lines:
+                # Extract node ID and type
                 if "<Node" in line and "z:Id=" in line:
                     attrs = parse_attr(line)
                     node_id = attrs.get("z:Id")
@@ -74,15 +74,58 @@ def parse_blocks(blocks):
                 elif "<Name" in line and "z:Id" in line and node_name is None:
                     node_name = re.sub(r"<.*?>", "", line).strip()
 
-                elif "<m_Inputs" in line:
+                elif "<m_Inputs " in line:
                     attrs = parse_attr(line)
                     m_inputs_id = attrs.get("z:Id")
                     m_inputs_size = attrs.get("z:Size")
 
-                elif "<m_Outputs" in line:
+                elif "<m_Outputs " in line:
                     attrs = parse_attr(line)
                     m_outputs_id = attrs.get("z:Id")
                     m_outputs_size = attrs.get("z:Size")
+
+                # Catch internal connectors (flat tags like <d2p1:m_OutputXYZ z:Ref="..." />)
+                elif re.match(r"<d2p1:m_(Input|Output)[^ >]*", line):
+                    #print(f"Checking line: {line.strip()}")
+                    tag_match = re.match(r"<d2p1:(m_(Input|Output)[^ >]*)", line)
+                    if tag_match:
+                        socket_name = tag_match.group(1)  # e.g., m_InputUV
+                #        print(f"  Socket tag: {socket_name}")
+                        attrs = parse_attr(line)
+                        connector_id = attrs.get("z:Id") or attrs.get("z:Ref")
+                        conn_type = "z:Id" if "z:Id" in attrs else "z:Ref"
+                #        print(f"  ID: {connector_id}, Conn_Type: {conn_type}")
+
+                        internal_connectors.append({
+                            "ID": connector_id,
+                            "Conn_Type": conn_type,
+                            "Socket": socket_name
+                        })
+                    else:
+                        print("tag_match failed")
+
+#d2p1_attr to be caught here:
+                # Catch internal attributes like <d2p1:Max>1</d2p1:Max>
+                elif re.match(r"<d2p1:", line) and not re.match(r"<d2p1:m_(Input|Output)[^ >]*", line.strip()):
+                    #print(f"Checking line: {line.strip()}")
+                    if re.match(r"<d2p1:(\w+)>(.*?)</d2p1:\1>", line):
+                        d2p1_match = re.match(r"<d2p1:(\w+)>(.*?)</d2p1:\1>", line)
+                        if d2p1_match:
+                            attr = d2p1_match.group(1)  # e.g., Max
+                            content = d2p1_match.group(2)
+                            d2p1_attr[attr] = content
+                        #    print(f"  Attribute: {d2p1_attr}")
+                            node["d2p1_attr"] = d2p1_attr
+
+                    elif re.match(r"<d2p1:(\w+)(\s[^>]*)?>(.*?)</d2p1:\1>", line):
+                        d2p1_match = re.match(r"<d2p1:(\w+)(\s[^>]*)?>(.*?)</d2p1:\1>", line)
+                        if d2p1_match:
+                            attr = d2p1_match.group(1)  # e.g., Max
+                            content = html.unescape(d2p1_match.group(3))
+                            d2p1_attr[attr] = content
+                        #    print(f"  Attribute: {d2p1_attr}")
+                            node["d2p1_attr"] = d2p1_attr
+
 
             if node_id:
                 if node_id not in nodes:
@@ -90,7 +133,6 @@ def parse_blocks(blocks):
                         "Node_Id": node_id,
                         "Node_Name": node_name or "",
                         "Node_Type": node_type or "",
-                    #    "isColor": "",
                         "m_Inputs": {
                             "Id": int(m_inputs_id) if m_inputs_id else None,
                             "Size": int(m_inputs_size) if m_inputs_size else None
@@ -98,11 +140,36 @@ def parse_blocks(blocks):
                         "m_Outputs": {
                             "Id": int(m_outputs_id) if m_outputs_id else None,
                             "Size": int(m_outputs_size) if m_outputs_size else None
-                        }
+                        },
+                        "Internal_Connectors": internal_connectors,
+                        "d2p1_Attributes": d2p1_attr
                     }
                 else:
+                    # Update only if missing
                     if node_name and not nodes[node_id].get("Node_Name"):
                         nodes[node_id]["Node_Name"] = node_name
+
+                    # Merge internal connectors
+                    if internal_connectors:
+                        if "Internal_Connectors" not in nodes[node_id]:
+                            nodes[node_id]["Internal_Connectors"] = internal_connectors
+                        else:
+                            nodes[node_id]["Internal_Connectors"].extend(internal_connectors)
+
+                if "d2p1_Attributes" not in nodes[node_id]:
+                    nodes[node_id]["d2p1_Attributes"] = d2p1_attr
+                else:
+                    nodes[node_id]["d2p1_Attributes"].update(d2p1_attr)
+
+                    # Deduplicate internal connectors
+                    seen = set()
+                    deduped = []
+                    for conn in nodes[node_id]["Internal_Connectors"]:
+                        key = (conn["ID"], conn["Conn_Type"], conn["Socket"])
+                        if key not in seen:
+                            seen.add(key)
+                            deduped.append(conn)
+                    nodes[node_id]["Internal_Connectors"] = deduped
 
         elif block_type in {"m_Inputs", "m_Outputs"}:
             mode = block_type
@@ -144,7 +211,7 @@ def parse_blocks(blocks):
                         "Socket_Id": socket_id,
                         "Conn_Type": conn_type,
                         "Conn_Name": conn_name or "",
-                        "Node": node_ref#,
+                        #"Node": node_ref,
                         #"Enum": enum
                     })
 
@@ -167,8 +234,6 @@ def parse_blocks(blocks):
                 if "<NodeConnection" in line:
                     attrs = parse_attr(line)
                     current_conn = {"z:Id": attrs.get("z:Id")}
-
-
 
                 elif "<From" in line:
                     from_attrs = parse_attr(line)
@@ -207,9 +272,10 @@ def parse_blocks(blocks):
         elif block_type == "NodeConnection":
             enum_value = None
             target_socket_id = None
-            is_color = False
             component_mask_node_id = None  # store the z:Id of the ComponentMaskNode if we find one
-            component_lines = {}
+            component_channel_used = None
+            alt_conn_name = None
+            component_channels_used = set()
 
             for i, line in enumerate(lines):
                 if "<Enabled>" in line and i > 0:
@@ -223,44 +289,39 @@ def parse_blocks(blocks):
                     if match:
                         enum_value = match.group(1)
 
-                elif "<d2p1:IsColor>" in line:
-                    match = re.search(r"<d2p1:IsColor>(true|false)</d2p1:IsColor>", line, re.IGNORECASE)
-                    if match and match.group(1).lower() == "true":
-                        is_color = True
-
                 elif "<Node" in line and "ComponentMaskNode" in line:
                     attrs = parse_attr(line)
                     component_mask_node_id = attrs.get("z:Id")  # store the node ID for later
 
-                elif "<d2p1:Component1>" in line:
-                    component_lines["X"] = line.strip().split(">")[1].split("<")[0]
-                elif "<d2p1:Component2>" in line:
-                    component_lines["Y"] = line.strip().split(">")[1].split("<")[0]
-                elif "<d2p1:Component3>" in line:
-                    component_lines["Z"] = line.strip().split(">")[1].split("<")[0]
-                elif "<d2p1:Component4>" in line:
-                    component_lines["W"] = line.strip().split(">")[1].split("<")[0]
+                elif "<d2p1:Component" in line:
+                    val = line.strip().split(">")[1].split("<")[0]
+                    if val and val.lower() != "none":
+                        component_channels_used.add(val.upper())  # Add "X", "Y", "Z", or "W"
+
+                elif re.match(r'<d2p1:m_\w+Connector\s+z:\w+="(\d+)"', line):
+                    alt_match = re.match(r'<d2p1:m_(\w+)(?:Connector)\s+z:\w+="(\d+)"', line)
+                    if alt_match:
+                        alt_conn_name = alt_match.group(1)  # e.g. 'm_YConnector'
+                        target_socket_id = alt_match.group(2)
+
 
             # Patch connector info
-            if target_socket_id:
-                for node in nodes.values():
-                    for group_key in ["m_Inputs", "m_Outputs"]:
-                        conns = node.get(group_key, {}).get("Connectors", [])
-                        for conn in conns:
-                            if conn.get("Socket_Id") == target_socket_id:
-                                if enum_value:
-                                    conn["Enum"] = enum_value
-                                node["IsColor"] = is_color
-                                break
+                if target_socket_id:
+                    for node in nodes.values():
+                        for group_key in ["m_Inputs", "m_Outputs"]:
+                            conns = node.get(group_key, {}).get("Connectors", [])
+                            for conn in conns:
+                                if conn.get("Socket_Id") == target_socket_id:
+                                    if enum_value:
+                                        conn["Enum"] = enum_value
+                                    elif alt_conn_name:
+                                        conn["Conn_name_2"] = alt_conn_name
 
             # Patch ComponentMaskNode type if we found one
-            if component_mask_node_id and component_mask_node_id in nodes:
-                for key, val in component_lines.items():
-                    if val and val.lower() != "none":
-                        nodes[component_mask_node_id]["Node_Type"] = f"ComponentMaskNode_{key}"
-                        break  # only first non-None
-
-
+            if component_mask_node_id and component_channels_used and component_mask_node_id in nodes:
+                # Sort to ensure consistent variant names (e.g., XZ not ZX)
+                ordered = ''.join(sorted(component_channels_used))
+                nodes[component_mask_node_id]["Node_Type"] = f"ComponentMaskNode_{ordered}"
 
     return {
         "Nodes": nodes,
@@ -308,8 +369,9 @@ def patch_missing_connector_names(parsed):
     nodes = parsed["Nodes"]
     connections = parsed["Connections"]
     nodeconnectors = parsed["NodeConnectors"]
+    nodeconnection = parsed["NodeConnection"]
 
-    # Build map of Socket_Id → name from connections
+    # Build map of Socket_Id  name from connections
     socket_name_map = {}
     for conn in connections.values():
         from_id = conn.get("From_Socket")
@@ -328,15 +390,22 @@ def patch_missing_connector_names(parsed):
             group = node.get(io_key, {})
             conns = group.get("Connectors", [])
             for conn in conns:
+                Conn_name_2 = conn.get("Conn_name_2")
                 if not conn.get("Conn_Name") and conn.get("Socket_Id") in socket_name_map:
                     conn["Conn_Name"] = socket_name_map[conn["Socket_Id"]]
+                elif conn.get("Conn_name_2") and not conn.get("Conn_Name") in socket_name_map:
+                    conn["Conn_Name"] = conn["Conn_name_2"]
+
+#remove socket names from connections, but keep it in the node/socket section.
+
+    for conn in connections.values():
+        conn.pop("From_Socket_Name", None)
+        conn.pop("To_Socket_Name", None)
 
     return parsed
 
+def run(input_path, output_path):
 
-
-# === Main execution ===
-if __name__ == "__main__":
     # Step 1: Load and parse the raw block-structured text input
     raw_blocks = extract_blocks_from_file(input_path)
 
@@ -353,6 +422,15 @@ if __name__ == "__main__":
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(structured, f, indent=2)
-        print(f"Wrote structured JSON to: {output_path}")
-    else:
-        print(json.dumps(structured, indent=2))
+
+# === Main execution ===
+if __name__ == "__main__":
+
+    if len(sys.argv) < 2:
+        print("Usage: python LSMG_stage2_txt_to_json.py input.txt [output.json]")
+        sys.exit(1)
+
+    input_path = sys.argv[1]
+    output_path = sys.argv[2] if len(sys.argv) > 2 else "extracted_output.json"
+
+    run(input_path, output_path)

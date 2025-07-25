@@ -1,0 +1,1176 @@
+{
+  "AbsNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "ABSOLUTE",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "AddNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "ADD",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "AddNode_color": {
+    "blend_type": "ADD",
+    "data_type": "RGBA",
+    "inputs": [
+      {
+        "identifier": "A_Color",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "B_Color",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Color",
+        "index": 2,
+        "is_linked": true,
+        "name": "Result",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeMix"
+  },
+  "AddNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "ADD",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "CombineNode_vector": {
+    "inputs": [
+      {
+        "identifier": "X",
+        "index": 0,
+        "is_linked": true,
+        "name": "X",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Y",
+        "index": 1,
+        "is_linked": true,
+        "name": "Y",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Z",
+        "index": 2,
+        "is_linked": true,
+        "name": "Z",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeCombineXYZ"
+  },
+  "ConstantClampNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result",
+        "index": 0,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeClamp"
+  },
+  "ConstantFloatNode": {
+    "inputs": [],
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeValue"
+  },
+  "ConstantVector3Node_color": {
+    "inputs": [],
+    "outputs": [
+      {
+        "identifier": "Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeRGB"
+  },
+  "DivideNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "DIVIDE",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "DivideNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "DIVIDE",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "DotNode": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "DOT_PRODUCT",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "LengthNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "LENGTH",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "LinearInterpolateNode": {
+    "blend_type": "MIX",
+    "data_type": "FLOAT",
+    "inputs": [
+      {
+        "identifier": "Factor_Float",
+        "index": 0,
+        "is_linked": true,
+        "name": "Factor",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Float",
+        "index": 2,
+        "is_linked": true,
+        "name": "A",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "B_Float",
+        "index": 3,
+        "is_linked": true,
+        "name": "B",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Color",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "B_Color",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Float",
+        "index": 0,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMix"
+  },
+  "LinearInterpolateNode_color": {
+    "blend_type": "MIX",
+    "data_type": "RGBA",
+    "inputs": [
+      {
+        "identifier": "Factor_Float",
+        "index": 0,
+        "is_linked": true,
+        "name": "Factor",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Color",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "B_Color",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Color",
+        "index": 2,
+        "is_linked": true,
+        "name": "Result",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeMix"
+  },
+  "MaxNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "MAXIMUM",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "MultiplyNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "MULTIPLY",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "MultiplyNode_color": {
+    "blend_type": "MULTIPLY",
+    "data_type": "RGBA",
+    "inputs": [
+      {
+        "identifier": "B_Float",
+        "index": 3,
+        "is_linked": true,
+        "name": "B",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Color",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "B_Color",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Color",
+        "index": 2,
+        "is_linked": true,
+        "name": "Result",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeMix"
+  },
+  "MultiplyNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "MULTIPLY",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "NormalizeNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "NORMALIZE",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "PassthroughNode": {
+    "inputs": [
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "SHADER"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "SHADER"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "NodeReroute"
+  },
+  "PassthroughNode_color": {
+    "inputs": [
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "SHADER"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "SHADER"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "NodeReroute"
+  },
+  "PowerNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "POWER",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "ShaderNodeAttribute": {
+    "inputs": [],
+    "outputs": [
+      {
+        "identifier": "Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Alpha",
+        "index": 3,
+        "is_linked": true,
+        "name": "Alpha",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeAttribute"
+  },
+  "ShaderNodeBlackbody": {
+    "inputs": [],
+    "outputs": [],
+    "type": "ShaderNodeBlackbody"
+  },
+  "ShaderNodeBsdfPrincipled": {
+    "inputs": [
+      {
+        "identifier": "Base Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Base Color",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Metallic",
+        "index": 1,
+        "is_linked": true,
+        "name": "Metallic",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Roughness",
+        "index": 2,
+        "is_linked": true,
+        "name": "Roughness",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Alpha",
+        "index": 4,
+        "is_linked": true,
+        "name": "Alpha",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Normal",
+        "index": 5,
+        "is_linked": true,
+        "name": "Normal",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Subsurface Weight",
+        "index": 8,
+        "is_linked": true,
+        "name": "Subsurface Weight",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Specular IOR Level",
+        "index": 13,
+        "is_linked": true,
+        "name": "Specular IOR Level",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Anisotropic",
+        "index": 15,
+        "is_linked": true,
+        "name": "Anisotropic",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Emission Color",
+        "index": 27,
+        "is_linked": true,
+        "name": "Emission Color",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "BSDF",
+        "index": 0,
+        "is_linked": true,
+        "name": "BSDF",
+        "type": "SHADER"
+      }
+    ],
+    "type": "ShaderNodeBsdfPrincipled"
+  },
+  "ShaderNodeCombineColor": {
+    "inputs": [
+      {
+        "identifier": "Red",
+        "index": 0,
+        "is_linked": true,
+        "name": "Red",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Green",
+        "index": 1,
+        "is_linked": true,
+        "name": "Green",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Blue",
+        "index": 2,
+        "is_linked": true,
+        "name": "Blue",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeCombineColor"
+  },
+  "ShaderNodeInvert": {
+    "inputs": [
+      {
+        "identifier": "Color",
+        "index": 1,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeInvert"
+  },
+  "ShaderNodeMapping": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Location",
+        "index": 1,
+        "is_linked": true,
+        "name": "Location",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeMapping"
+  },
+  "ShaderNodeMath_GREATER_THAN": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "GREATER_THAN",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "ShaderNodeNewGeometry": {
+    "inputs": [],
+    "outputs": [
+      {
+        "identifier": "Position",
+        "index": 0,
+        "is_linked": true,
+        "name": "Position",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "True Normal",
+        "index": 3,
+        "is_linked": true,
+        "name": "True Normal",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeNewGeometry"
+  },
+  "ShaderNodeNormalMap": {
+    "inputs": [
+      {
+        "identifier": "Color",
+        "index": 1,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Normal",
+        "index": 0,
+        "is_linked": true,
+        "name": "Normal",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeNormalMap"
+  },
+  "ShaderNodeObjectInfo": {
+    "inputs": [],
+    "outputs": [
+      {
+        "identifier": "Location",
+        "index": 0,
+        "is_linked": true,
+        "name": "Location",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeObjectInfo"
+  },
+  "ShaderNodeOutputMaterial": {
+    "inputs": [
+      {
+        "identifier": "Surface",
+        "index": 0,
+        "is_linked": true,
+        "name": "Surface",
+        "type": "SHADER"
+      }
+    ],
+    "outputs": [],
+    "type": "ShaderNodeOutputMaterial"
+  },
+  "ShaderNodeSeparateColor": {
+    "inputs": [
+      {
+        "identifier": "Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Red",
+        "index": 0,
+        "is_linked": true,
+        "name": "Red",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Green",
+        "index": 1,
+        "is_linked": true,
+        "name": "Green",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Blue",
+        "index": 2,
+        "is_linked": true,
+        "name": "Blue",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeSeparateColor"
+  },
+  "ShaderNodeSeparateXYZ": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "X",
+        "index": 0,
+        "is_linked": true,
+        "name": "X",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Y",
+        "index": 1,
+        "is_linked": true,
+        "name": "Y",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Z",
+        "index": 2,
+        "is_linked": true,
+        "name": "Z",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeSeparateXYZ"
+  },
+  "ShaderNodeTexCoord": {
+    "inputs": [],
+    "outputs": [
+      {
+        "identifier": "Generated",
+        "index": 0,
+        "is_linked": true,
+        "name": "Generated",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "UV",
+        "index": 2,
+        "is_linked": true,
+        "name": "UV",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeTexCoord"
+  },
+  "ShaderNodeTexImage": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Color",
+        "index": 0,
+        "is_linked": true,
+        "name": "Color",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Alpha",
+        "index": 1,
+        "is_linked": true,
+        "name": "Alpha",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeTexImage"
+  },
+  "ShaderNodeTexNoise": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Fac",
+        "index": 0,
+        "is_linked": true,
+        "name": "Fac",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeTexNoise"
+  },
+  "ShaderNodeWavelength": {
+    "inputs": [],
+    "outputs": [],
+    "type": "ShaderNodeWavelength"
+  },
+  "SubtractNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "SUBTRACT",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "SubtractNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "SUBTRACT",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  }
+}

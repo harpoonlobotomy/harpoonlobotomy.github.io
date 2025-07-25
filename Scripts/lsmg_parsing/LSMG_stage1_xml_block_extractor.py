@@ -3,24 +3,10 @@
 import re
 import sys
 
-if len(sys.argv) < 2:
-    print("Usage: python extract_blocks.py input.xml [output.txt]")
-    sys.exit(1)
-
-input_path = sys.argv[1]
-output_path = sys.argv[2] if len(sys.argv) > 2 else None
-
-with open(input_path, 'r', encoding='utf-8') as f:
-    xml_data = f.read()
-
-
-OUTPUT_FILE = r"F:\Python_Scripts\LSMG_scripts\test.txt"
 ISOLATE_LINES = False  # Run simple isolate lines function
 ISOLATE_TAG = "Collapsed"
 ISOLATE_FOLLOWING = 4
-
-ENABLE_TRIM_ENDTAGS = False  # or False to disable
-
+ENABLE_TRIM_ENDTAGS = False  # or False to disable  (or see Optional node below)
 RUN_BLOCK_PARSER = False  # Run original block extractor
 RUN_PARENT_EXCLUDE_NESTED = True  # Run new parent-exclude-nested extractor
 
@@ -33,10 +19,12 @@ PARENT_BLOCK_PATTERNS = [
     {
         "tag": "m_Inputs",
         "include": ["NodeConnector", "Node"],
+#        "preserve_starts": #["Location", "m_Inputs", "m_Outputs"]
     },
     {
         "tag": "m_Outputs",
         "include": ["NodeConnector"],
+#        "preserve_starts": #["Location", "m_Inputs", "m_Outputs"]
     },
     {
         "tag": "m_Connections",
@@ -52,7 +40,6 @@ PARENT_BLOCK_PATTERNS = [
         "exclude": ["m_Connections", "d2p1:ExportAsPreset", "Collapsed", "DummyInputBounds", "DummyOutputBounds", "ImageFileName", "NameSize", "NodeDescription", "RefreshConnectorNamesImage", "OriginalName", "RenderFlag", "NodeConnector"]
     },
 ]
-
 
 def tag_line(tag_name, attrs=None, self_close=False, open_only=False):
     attr_pattern = ""
@@ -106,7 +93,6 @@ def try_match_block(lines, start_index, block_pattern):
             print("MATCH\n")
 
     return "\n".join(candidate)
-
 
 
 # === MAIN BLOCK EXTRACTION ===
@@ -301,6 +287,7 @@ def extract_parent_blocks_excluding_nested_sets(filepath, patterns):
 
     return output
 
+
 def trim_all_endtags_from_output_blocks(output_blocks):
     trimmed_blocks = []
     for name, block_text in output_blocks:
@@ -312,17 +299,17 @@ def trim_all_endtags_from_output_blocks(output_blocks):
 
 
 # === MAIN ===
-if __name__ == "__main__":
+def run(input_path, output_path):
     output_blocks = []
 
     if ISOLATE_LINES:
-        matches = isolate_lines_with_following(INPUT_FILE, ISOLATE_TAG, ISOLATE_FOLLOWING)
+        matches = isolate_lines_with_following(input_path, ISOLATE_TAG, ISOLATE_FOLLOWING)
         for m in matches:
             print("----- MATCH -----")
             print(m)
 
     if RUN_BLOCK_PARSER:
-        blocks = extract_all_blocks(INPUT_FILE)
+        blocks = extract_all_blocks(input_path)
         output_blocks.extend(blocks)
 
     if RUN_PARENT_EXCLUDE_NESTED:
@@ -333,7 +320,6 @@ if __name__ == "__main__":
         if ENABLE_TRIM_ENDTAGS:
             output_blocks = trim_all_endtags_from_output_blocks(output_blocks)
 
-
         output_text = ""
         for name, block in output_blocks:
             output_text += f"<!-- {name} -->\n"
@@ -342,10 +328,15 @@ if __name__ == "__main__":
         if output_path:
             with open(output_path, "w", encoding="utf-8") as out:
                 out.write(output_text)
-        else:
-            print(output_text)
 
-        if output_path:
-            print(f"Extracted {len(output_blocks)} blocks to '{output_path}'")
-        else:
-            print(f"Extracted {len(output_blocks)} blocks to stdout")
+# Optional CLI runner
+if __name__ == "__main__":
+
+    if len(sys.argv) < 2:
+        print("Usage: python xml_block_extractor.py input.xml [output.txt]")
+        sys.exit(1)
+
+    input_path = sys.argv[1]
+    output_path = sys.argv[2] if len(sys.argv) > 2 else "extracted_output.txt"
+
+    run(input_path, output_path)
