@@ -1,12 +1,13 @@
-##--- Seems to actually apply names to the faux group sockets now.
+## Exports "nodegroups" in the form of frame-bounded node setups with links.
 ##-- Label reroute nodes as 'input_0/Name' - it will recognise the input_0 for linking, indexing, but use the /Name for the output file.
-## Run script `F:\Python_Scripts\Blender Scripts\nodegroup_from_frame_text_file.py` to deploy nodegroups
+## Run script `F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\BLENDER_really_nodegroup_from_frame_json_file.py` to deploy nodegroups
 
 import bpy
 import os
+import json
 
 def serialize_value(val, indent=0):
-    ind = '    ' * indent
+    ind = '  ' * indent
     if isinstance(val, dict):
         lines = []
         lines.append("{")
@@ -16,24 +17,26 @@ def serialize_value(val, indent=0):
             lines.append(f'{ind}    "{k}": {serialize_value(v, indent + 1)}{comma}')
         lines.append(ind + "}")
         return "\n".join(lines)
-    elif isinstance(val, list):
+    elif isinstance(val, (list, tuple)):
         if len(val) <= 4 and all(isinstance(x, (int, float)) for x in val):
             return "[" + ", ".join(str(round(x)) if isinstance(x, float) else str(x) for x in val) + "]"
         lines = ["["]
         n = len(val)
         for i, item in enumerate(val):
             comma = "," if i < n - 1 else ""
-            if isinstance(item, list) and len(item) <= 4 and all(isinstance(x, (int, float, str)) for x in item):
+            if isinstance(item, (list, tuple)) and len(item) <= 4 and all(isinstance(x, (int, float, str)) for x in item):
                 item_str = "[" + ", ".join(f'"{x}"' if isinstance(x, str) else str(x) for x in item) + "]"
                 lines.append(f'{ind}    {item_str}{comma}')
             else:
                 lines.append(f'{ind}    {serialize_value(item, indent + 1)}{comma}')
         lines.append(ind + "]")
         return "\n".join(lines)
+
     elif isinstance(val, str):
         return f'"{val}"'
     elif isinstance(val, bool):
-        return "False" if val else "True"
+        print(f"{val} 123456")
+        return "true" if val else "false"
     elif val is None:
         return "null"
     else:
@@ -125,19 +128,20 @@ def export_frame_groups_custom():
 
     frames = [n for n in nodes if n.type == 'FRAME']
     new_output = {}
-    output_path = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\blender_nodegroups_for_generation.txt"
+    output_path = r"F:\Python_Scripts\Blender Scripts\frame_exported_nodegroups_3.json"
 
-    # Step 1: Get existing top-level frame keys based on no indentation
+
+    # Step 1: Get existing top-level frame keys
     existing_keys = set()
     if os.path.exists(output_path):
         with open(output_path, "r", encoding="utf-8") as f:
-            for line in f:
-                # Strip newline only, not leading spaces
-                if line.startswith('"') and line.rstrip().endswith('{'):
-                    if line[0].isspace():
-                        continue  # Indented line, skip
-                    key = line.split('"')[1]
-                    existing_keys.add(key)
+            try:
+                existing_data = json.load(f)
+                existing_keys = set(existing_data.keys())
+            except json.JSONDecodeError:
+                print("[WARN] Existing file is not valid JSON. Starting fresh.")
+                existing_data = {}
+
 
     print(f"[Info] Existing frame keys in file: {existing_keys}")
 
@@ -147,13 +151,19 @@ def export_frame_groups_custom():
         group_name = frame.label or frame.name
 
         if group_name in existing_keys:
-            print(f"[Skip] Frame '{group_name}' already exists in file.")
-            continue
+            saved_data = {}
+            existing_entry = existing_data.get(group_name, {})
+            if "color" in existing_entry:
+                saved_data["color"] = existing_entry["color"]
 
-        else:
+            if "autohide" in existing_entry:
+                saved_data["autohide"] = existing_entry["autohide"]
+                print(f"Saved data for {group_name} is: {saved_data}")
+
+        if group_name:
             group_data = {
                 "color": "",
-                "autohide": True,
+                "autohide": False,
                 "sockets": {
                     "inputs": {},
                     "outputs": {}
@@ -259,6 +269,15 @@ def export_frame_groups_custom():
                             to_socket
                         ])
 
+
+            if group_name in existing_keys:
+                if "color" in saved_data:
+                    group_data["color"] = saved_data["color"]
+                if "autohide" in saved_data:
+              #      group_data["autohide"] = saved_data["autohide"]
+                    print(f"[Debug] Restoring autohide for {group_name}: {saved_data['autohide']} ({type(saved_data['autohide'])})")
+                    group_data["autohide"] = saved_data["autohide"]
+
             # Now remap reroute names to GroupInput/GroupOutput for output ONLY
             remap_reroute_names(group_data, reroute_map)
 
@@ -295,10 +314,32 @@ def export_frame_groups_custom():
 
     # Output all groups to file, with commas between, no extra file opening
         # Step 3: Append new entries to the file
-    with open(output_path, "a", encoding="utf-8") as f:
-        for i, (key, val) in enumerate(new_output.items()):
-            f.write(f'"{key}": {serialize_value(val, 0)},\n')
 
-    print(f"[Info] Appended {len(new_output)} new frame group(s) to '{output_path}'")
+    # Load existing content (if any)
+    existing_data = {}
+    if os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as f:
+            try:
+                existing_data = json.load(f)
+            except json.JSONDecodeError:
+                print("[WARN] Existing file is not valid JSON. Starting fresh.")
+
+
+    # Update with new entries (overwriting by group name if duplicated)
+    existing_data.update(new_output)
+
+    # Serialize using your custom function
+    full_serialized = "{\n"
+    items = list(existing_data.items())
+    for i, (key, val) in enumerate(items):
+        comma = "," if i < len(items) - 1 else ""
+        full_serialized += f'  "{key}": {serialize_value(val, 1)}{comma}\n'
+    full_serialized += "}\n"
+
+    # Save to file (overwrite)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(full_serialized)
+
+    print(f"[Info] Wrote {len(new_output)} new group(s) to JSON at '{output_path}'")
 
 export_frame_groups_custom()

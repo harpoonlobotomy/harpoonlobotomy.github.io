@@ -29,21 +29,21 @@ Also potentially works with other UE4-based material nodegraphs' XML-like docume
     Run `BLENDER_export_native_node_data.py` to get native sockets.
     (Key names should match the LSMG node_type.)
 
-    For nodegroups, run `BLENDER_export_frames_for_nodegroup_gen.py`,
+    For nodegroups, run `BLENDER_export_frames_for_nodegroup_gen_to_json.py`,
     with frame names as the node_type.
     See `Core_Script_Overview.md` for slightly more detail. )`
 
-# Stage 5: merge_stage2_and_stage4_with_blender_names_02.py
+# Stage 5: LSMG_stage5_merge_2and5_final_output_jsonvers.py
     Input Example:
         `stage_2_tmp_CHAR_Fur.json`
         `stage_4_tmp_CHAR_Fur.json`
         `blender_native_node_ref.json`
-        `blender_nodegroups_for_generation.txt`
+        `blender_exported_nodegroups_for_gen`
     Output Example: `stage_5_tmp_CHAR_Fur.json`
 	* Will also produce a _missing_nodes.json if any missing nodes are found.
 ---
 
-# Wrapper: LSMG_5Stage_Wrapper.py
+# Wrapper: LSMG_5Stage_Wrapper_jsonvers.py
 	Input example: CHAR_Fur.lsmg
 	Output example: stage_5_tmp.json
 
@@ -129,12 +129,13 @@ Combine raw node metadata with discovered data types to produce a Blender-usable
 - Map to:
   - Blender native node classes (e.g. ShaderNodeVectorMath)
   - Node operations (e.g. Multiply, Dot Product)
+  - Mix Node blend_type and data_type (Eg 'Color, Multiply' for 'Mix Color' set to 'Multiply')
   - Nodegroup replacements where needed (e.g. custom 'Power_vector')
 
 **Output:**
 - A fully enriched JSON representation of the nodegraph:
   - Accurate data types at node and socket level
-  - Identified Blender node classes or group substitutes
+  - Identified Blender node classes or nodegroup substitutes
   - Connection structure ready for Blender import
 
 ---
@@ -145,8 +146,24 @@ Combine raw node metadata with discovered data types to produce a Blender-usable
 - Earlier stages are **intentionally verbose**, trading off complexity for clarity.
 - Later stages refine and annotate without mutating earlier assumptions.
 - Consolidation into fewer scripts is theoretically possible, but not currently beneficial.
-- A wrapper script (`LSMG_5Stage_Wrapper.py`) compiles these into one toolchain, so the number of scripts does not impact usability.
+- A wrapper script (`LSMG_5Stage_Wrapper_jsonvers.py`) compiles these into one toolchain, so the number of scripts does not impact usability.
 
 ---
 
 harpoonlobotomy, July 2025
+
+
+
+---
+
+# Changelog:
+
+27/07/25
+
+Updated the Stage5 and Wrapper scripts to use a JSON-type nodegroup file instead of the original .txt file.
+Replaced the text file with the new .json version.
+
+Now, the focus is on remaking the blender integration scripts.
+Hopefully not too many more changes to these LSMG scripts; that'll just depend on if I realise I've missed something I'll need later.
+
+-harpoon

@@ -1,5 +1,5 @@
 ## To run:
-## command prompt: python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_Fur.lsmg" --temp-dir "F:\test\wrapper_script_test_output"
+## command prompt: python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_json_not_txt.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_Fur.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output2"
 #or
 ## command prompt: python LSMG_5Stage_Wrapper.py CHAR_Fur.lsmg --temp-dir wrapper_script_test_output
 
@@ -34,7 +34,7 @@ def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_ou
     LSMG_stage2_txt_to_json = import_script("LSMG_stage2_txt_to_json.py", "stage2")
     LSMG_stage3_chains_from_json = import_script("LSMG_stage3_chains_from_json.py", "stage3")
     LSMG_stage4_forward_tracer = import_script("LSMG_stage4_forward_tracer.py", "stage4")
-    LSMG_stage5_merge_2and5_final_output = import_script("LSMG_stage5_merge_2and5_final_output.py", "stage5")
+    LSMG_stage5_merge_2and5_final_output = import_script("LSMG_stage5_merge_2and5_final_output_uses_json_not_txt.py", "stage5")
 
     # Stage 1
     txt_out = make_temp_path("stage_1", base_name, use_named_tmp, temp_dir, ext=".txt")
@@ -58,7 +58,7 @@ def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_ou
 
     # Stage 5 (with bundled reference files)
     blender_ref = os.path.join(SCRIPT_DIR, "blender_native_node_ref.json")
-    exported_groups = os.path.join(SCRIPT_DIR, "blender_nodegroups_for_generation.txt")
+    exported_groups = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\frame_exported_nodegroups.json"
     final_out = make_temp_path("stage_5", base_name, use_named_tmp, temp_dir)
 
     LSMG_stage5_merge_2and5_final_output.run(

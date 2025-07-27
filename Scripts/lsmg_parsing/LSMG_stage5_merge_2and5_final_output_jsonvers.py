@@ -2,24 +2,18 @@ import json
 from collections import OrderedDict
 import os
 
-def load_json_files(first_data_path, second_data_path, blender_native_nodes_path):
+def load_json_files(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path):
     with open(first_data_path, "r", encoding="utf-8") as f1, \
          open(second_data_path, "r", encoding="utf-8") as f2, \
-         open(blender_native_nodes_path, "r", encoding="utf-8") as f3:
+         open(blender_native_nodes_path, "r", encoding="utf-8") as f3, \
+         open(nodegroups_defs_path, "r", encoding="utf-8-sig") as f4:
         first_data = json.load(f1)
         second_data = json.load(f2)
         blender_native_nodes = json.load(f3)
-    return first_data, second_data, blender_native_nodes
+        nodegroups_defs = json.load(f4)
 
-def load_nodegroups_defs(nodegroups_defs_path):
-    nodegroups_defs = set()
-    with open(nodegroups_defs_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            if line.endswith(': {') and line.startswith('"'):
-                key = line.split('"')[1]
-                nodegroups_defs.add(key)
-    return nodegroups_defs
+    return first_data, second_data, blender_native_nodes, nodegroups_defs
+
 
 def extract_type(full_type):
     return full_type.split(" /")[0].strip()
@@ -143,7 +137,7 @@ def collect_missing_node_types(first_data, blender_native_nodes, nodegroups_defs
 def write_missing_node_types(missing_node_types, truly_missing, missing_nodes_output_path):
     with open(missing_nodes_output_path, "w", encoding="utf-8") as f_missing:
         json.dump({
-            "missing_node_types": missing_node_types,
+            #"missing_node_types": missing_node_types,
             "truly_missing_node_types": truly_missing
         }, f_missing, indent=2)
     print(f"[Info] Wrote missing and truly missing node types to '{missing_nodes_output_path}'")
@@ -157,15 +151,14 @@ def write_reordered_output(first_data, reordered_output_path):
 def run(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, output_path):
     missing_nodes_output_path = os.path.splitext(output_path)[0] + "_missing_nodes.json"
 
-    first_data, second_data, blender_native_nodes = load_json_files(
-        first_data_path, second_data_path, blender_native_nodes_path)
-    nodegroups_defs = load_nodegroups_defs(nodegroups_defs_path)
+    first_data, second_data, blender_native_nodes, nodegroups_defs = load_json_files(
+        first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path)
     update_node_types_from_second_data(second_data, first_data)
     enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups_defs)
     reorder_all_nodes(first_data)
     missing_node_types, truly_missing = collect_missing_node_types(first_data, blender_native_nodes, nodegroups_defs)
 
-    if missing_node_types or truly_missing:
+    if truly_missing:
         write_missing_node_types(missing_node_types, truly_missing, missing_nodes_output_path)
     else:
         print("[Info] No missing node types found.")
@@ -178,7 +171,7 @@ if __name__ == "__main__":
     import os
 
     if len(sys.argv) < 6:
-        print("Usage: python LSMG_stage5_merge_2and5_final_output.py <stage2.json> <stage4.json> <blender_native.json> <nodegroups.txt> <output.json>")
+        print("Usage: python LSMG_stage5_merge_2and5_final_output.py <stage2.json> <stage4.json> <blender_native.json> <nodegroups.json> <output.json>")
         sys.exit(1)
 
     first_data_path = sys.argv[1]
