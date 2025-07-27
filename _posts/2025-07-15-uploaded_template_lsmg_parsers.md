@@ -3,7 +3,6 @@ title: LSMG files - parsed and usable.
 date: 2025-07-15
 layout: post
 categories:
-  - scripts
   - materials
 
 ---
@@ -11,7 +10,10 @@ categories:
 
 I'm not sure how well-known this is, but:
 
-# LSMG files can be used to recreate the nodetrees that all Material LSF files use as templates.
+
+
+** LSMG files can be used to recreate the nodetrees that all Material LSF files use as templates.**
+
 
 [The following are all my on observations; I don't have any Larian contacts or insider info, I was just curious and it was a fun mystery.]
 
