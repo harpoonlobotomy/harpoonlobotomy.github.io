@@ -167,3 +167,28 @@ Now, the focus is on remaking the blender integration scripts.
 Hopefully not too many more changes to these LSMG scripts; that'll just depend on if I realise I've missed something I'll need later.
 
 -harpoon
+
+----
+
+5/8/25
+
+Updated stages 1, 3 and 5 slightly to fix... something. I've genuinely forgotten what, but I do remember being pleased. 
+Also added the current version of the nodesequence_tracer script - it finds (currently just one) specific pattern within a nodegraph (using the output from Stage3) and reports back;
+I'm amending the Blender Template Generator script to use this bulk-replacement so replicate 4-channel-specific portions of nodetrees. Currently, just the main VT_Layer pattern, but it's potentially expandable. 
+
+The Blender templategen doesn't account for it yet, but it's in the works. Next few days, maybe. 
+
+I've worked on almost 500 scripts in 3 months now. I'm still rubbish at it, but I'm starting to be quicker at figuring out what's wrong and now and then, actually doing something good. I came at this backwards, starting with pretty intense stuff I couldn't even understand and now getting to grips with the basics. I really love it, actually. Didn't expect that.
+
+I want to look into what would be required to adapt the 5StageScripts to import more general UE material files. 
+
+Next up: 
+> Incorporate the nodegroup_blocks into the TempGen, and actually finish the nodegroup_blocks script - not much left, but I'm tired. 
+> Update the TempGen and MatGen to work together; currently, MatGen needs the Template pre-generated. I want to hook them together so that if the template is missing, MatGen will call Tempgen, pass it the required filename and it'll run the rest. 
+	(Including, hopefully, triggering the 5StageScripts to run on said file, so the MatGen would go from data-base-only to generated-template entirely within itself. That's the dream, I think.
+> Adapt the nodegroup_blocks script to use an external Pattern file, so I can set it to find any number of specific sequences with specific replacements. 
+> Change how TempGen 'finds' Nodegroups. Currently you have to re-parse (or manually add) the 'is_nodegroup' flag for them to be recognised, which is just silly. I'll use a dynamic list from the nodegroup file instead.
+> At some point actually make things in Blender again.
+> There was more, but I'm genuinely really tired. 
+
+- Harpoon.

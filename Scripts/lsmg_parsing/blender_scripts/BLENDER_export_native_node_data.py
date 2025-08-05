@@ -2,7 +2,6 @@
 
 #requires nodes to already be present and connected - does not make connections on its own.
 #Correctly merges sockets only if they match index and node attributes; prioritises any True over any False.
-# Note:  For proper integration and making things easier later, it is ideal to manually rename the keys to match their LSMG equivalents.
 
 import bpy
 import json
@@ -195,7 +194,7 @@ def main():
 
     data1 = inspect_material_nodes(mat)
 
-    ref_file = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\blender_native_node_ref.json"
+    ref_file = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\blender_native_node_ref_2.json"
   #  ref_file = r"F:\Python_Scripts\Blender Scripts\merged_native_node_sockets_onlytrue.json"
     # Load existing reference data (data2) or start empty if missing
     if os.path.exists(ref_file):
@@ -229,7 +228,5 @@ def main():
         json.dump(merged_data, f, indent=2, sort_keys=True)
 
     print(f"Reference JSON updated: {ref_file}")
-
-main()
 
 main()

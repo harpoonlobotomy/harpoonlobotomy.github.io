@@ -2,6 +2,27 @@ import json
 from collections import OrderedDict
 import os
 
+SOCKET_MAP = {
+    "RGBA": {
+        "Alpha": {"identifier": "Factor_Float", "index": 0},
+        "X": {"identifier": "A_Color", "index": 6},
+        "Y": {"identifier": "B_Color", "index": 7},
+        "Result": {"identifier": "Result_Color", "index": 2}
+    },
+    "VECTOR": {
+        "Alpha": {"identifier": "Factor_Float", "index": 0},
+        "X": {"identifier": "A_Vector", "index": 4},
+        "Y": {"identifier": "B_Vector", "index": 5},
+        "Result": {"identifier": "Result_Vector", "index": 1}
+    },
+    "VALUE": {
+        "Alpha": {"identifier": "Factor_Float", "index": 0},
+        "X": {"identifier": "A_Float", "index": 2},
+        "Y": {"identifier": "B_Float", "index": 3},
+        "Result": {"identifier": "Result_Float", "index": 0}
+    }
+}
+
 def load_json_files(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path):
     with open(first_data_path, "r", encoding="utf-8") as f1, \
          open(second_data_path, "r", encoding="utf-8") as f2, \
@@ -13,7 +34,6 @@ def load_json_files(first_data_path, second_data_path, blender_native_nodes_path
         nodegroups_defs = json.load(f4)
 
     return first_data, second_data, blender_native_nodes, nodegroups_defs
-
 
 def extract_type(full_type):
     return full_type.split(" /")[0].strip()
@@ -63,6 +83,11 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
             node["Data_Type"] = blender_node.get("data_type")
         if "operation" in blender_node:
             node["Blender_Operation"] = blender_node["operation"]
+        if "autohide" in blender_node:
+            node["Autohide"] = blender_node["autohide"]
+
+        conn_name = None
+        data_type = node["Data_Type"] = blender_node.get("data_type")
 
         blender_inputs_list = blender_node.get("inputs", [])
         connectors = node.get("m_Inputs", {}).get("Connectors", [])
@@ -72,6 +97,13 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
                 conn["Socket_Identifier"] = socket.get("identifier")
                 conn["blender_index"] = socket.get("index")
 
+                conn_name = conn.get("Conn_Name")  # <-- Fix is here
+                socket_info = SOCKET_MAP.get(data_type, {}).get(conn_name)
+                if socket_info:
+        #            print(f"{data_type}, {conn_name}")
+                    conn["Socket_Identifier"] = socket_info["identifier"]
+                    conn["blender_index"] = socket_info["index"]
+
         blender_outputs_list = blender_node.get("outputs", [])
         connectors = node.get("m_Outputs", {}).get("Connectors", [])
         for i, conn in enumerate(connectors):
@@ -80,7 +112,14 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
                 conn["Socket_Identifier"] = socket.get("identifier")
                 conn["blender_index"] = socket.get("index")
 
-        # Handle special case: add default Factor input if missing
+                conn_name = conn.get("Conn_Name")  # <-- Fix is here
+                socket_info = SOCKET_MAP.get(data_type, {}).get(conn_name)
+                if socket_info:
+            #        print(f"{data_type}, {conn_name}")
+                    conn["Socket_Identifier"] = socket_info["identifier"]
+                    conn["blender_index"] = socket_info["index"]
+                # Handle special case: add default Factor input if missing
+
         if len(blender_inputs_list) == len(connectors) + 1:
             for socket in blender_inputs_list:
                 identifier = socket.get("identifier", "").lower()
@@ -91,8 +130,8 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
                             "Default_Value": 1.0,
                             "blender_index": socket.get("index")
                         })
-                        print(f"[Set Factor] Node '{node.get('ID', '?')}' (type: {node.get('Type', '?')}) – defaulted 'Factor' to 1.0")
-                    break
+                                #print(f"[Set Factor] Node '{node.get('ID', '?')}' (type: {node.get('Type', '?')}) – defaulted 'Factor' to 1.0")
+                        break
 
 def reorder_node_fields(node):
     desired_order = [
@@ -104,6 +143,7 @@ def reorder_node_fields(node):
         "Blend_Type",
         "Blender_Operation",
         "Is_NodeGroup",
+        "Autohide",
         "d2p1_Attributes",
         "Location",
         "m_Inputs",

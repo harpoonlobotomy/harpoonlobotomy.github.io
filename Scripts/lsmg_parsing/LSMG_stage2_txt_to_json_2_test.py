@@ -384,17 +384,18 @@ def patch_missing_connector_names(parsed):
         if to_id and to_name:
             socket_name_map[to_id] = to_name
 
-    # Patch missing Conn_Name entries in m_Inputs and m_Outputs
-    for node in nodes.values():
-        for io_key in ["m_Inputs", "m_Outputs"]:
-            group = node.get(io_key, {})
-            conns = group.get("Connectors", [])
-            for conn in conns:
-                Conn_name_2 = conn.get("Conn_name_2")
-                if not conn.get("Conn_Name") and conn.get("Socket_Id") in socket_name_map:
-                    conn["Conn_Name"] = socket_name_map[conn["Socket_Id"]]
-                elif conn.get("Conn_name_2") and not conn.get("Conn_Name") in socket_name_map:
-                    conn["Conn_Name"] = conn["Conn_name_2"]
+        # Patch missing Conn_Name entries in m_Inputs and m_Outputs
+        for node in nodes.values():
+            for io_key in ["m_Inputs", "m_Outputs"]:
+                group = node.get(io_key, {})
+                conns = group.get("Connectors", [])
+                for conn in conns:
+                    Conn_name_2 = conn.get("Conn_name_2")
+                    if not conn.get("Conn_Name") and conn.get("Socket_Id") in socket_name_map:
+                        conn["Conn_Name"] = socket_name_map[conn["Socket_Id"]]
+                    elif conn.get("Conn_name_2") and not conn.get("Conn_Name") in socket_name_map:
+                        conn["Conn_Name"] = conn["Conn_name_2"]
+
 
 #remove socket names from connections, but keep it in the node/socket section.
 

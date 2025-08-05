@@ -1,5 +1,6 @@
 {
   "AbsNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -22,6 +23,7 @@
     "type": "ShaderNodeMath"
   },
   "AddNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -51,6 +53,7 @@
     "type": "ShaderNodeMath"
   },
   "AddNode_color": {
+    "autohide": true,
     "blend_type": "ADD",
     "data_type": "RGBA",
     "inputs": [
@@ -81,6 +84,7 @@
     "type": "ShaderNodeMix"
   },
   "AddNode_vector": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -110,6 +114,7 @@
     "type": "ShaderNodeVectorMath"
   },
   "CombineNode_vector": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "X",
@@ -145,6 +150,7 @@
     "type": "ShaderNodeCombineXYZ"
   },
   "ConstantClampNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -166,6 +172,7 @@
     "type": "ShaderNodeClamp"
   },
   "ConstantFloatNode": {
+    "autohide": true,
     "inputs": [],
     "outputs": [
       {
@@ -192,6 +199,7 @@
     "type": "ShaderNodeRGB"
   },
   "DivideNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -221,6 +229,7 @@
     "type": "ShaderNodeMath"
   },
   "DivideNode_vector": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -250,6 +259,7 @@
     "type": "ShaderNodeVectorMath"
   },
   "DotNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -278,7 +288,8 @@
     ],
     "type": "ShaderNodeVectorMath"
   },
-  "LengthNode_vector": {
+  "LengthNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -324,20 +335,6 @@
         "is_linked": true,
         "name": "B",
         "type": "VALUE"
-      },
-      {
-        "identifier": "A_Color",
-        "index": 6,
-        "is_linked": true,
-        "name": "A",
-        "type": "RGBA"
-      },
-      {
-        "identifier": "B_Color",
-        "index": 7,
-        "is_linked": true,
-        "name": "B",
-        "type": "RGBA"
       }
     ],
     "outputs": [
@@ -388,7 +385,45 @@
     ],
     "type": "ShaderNodeMix"
   },
+ "LinearInterpolateNode_vector": {
+    "blend_type": "MIX",
+    "data_type": "VECTOR",
+    "inputs": [
+      {
+        "identifier": "Factor_Float",
+        "index": 0,
+        "is_linked": true,
+        "name": "Factor",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Vector",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "B_Vector",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Vector",
+        "index": 2,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeMix"
+  },
   "MaxNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -418,6 +453,7 @@
     "type": "ShaderNodeMath"
   },
   "MultiplyNode": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -447,6 +483,7 @@
     "type": "ShaderNodeMath"
   },
   "MultiplyNode_color": {
+    "autohide": true,
     "blend_type": "MULTIPLY",
     "data_type": "RGBA",
     "inputs": [
@@ -484,6 +521,7 @@
     "type": "ShaderNodeMix"
   },
   "MultiplyNode_vector": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -512,7 +550,29 @@
     ],
     "type": "ShaderNodeVectorMath"
   },
+  "NodeReroute": {
+    "inputs": [
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VALUE"
+      }
+    ],
+    "type": "NodeReroute"
+  },
   "NormalizeNode_vector": {
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -598,6 +658,69 @@
     "type": "NodeReroute"
   },
   "PassthroughNode_color": {
+    "inputs": [
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "SHADER"
+      },
+      {
+        "identifier": "Input",
+        "index": 0,
+        "is_linked": true,
+        "name": "Input",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "SHADER"
+      },
+      {
+        "identifier": "Output",
+        "index": 0,
+        "is_linked": true,
+        "name": "Output",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "NodeReroute"
+  },
+  "PassthroughNode_vector": {
     "inputs": [
       {
         "identifier": "Input",
@@ -904,6 +1027,29 @@
     ],
     "type": "ShaderNodeMath"
   },
+  "SquareRootNode": {
+	"autohide": true,
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "SQRT",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
   "ShaderNodeNewGeometry": {
     "inputs": [],
     "outputs": [
@@ -1116,6 +1262,7 @@
     "type": "ShaderNodeWavelength"
   },
   "SubtractNode": {
+	"autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -1145,6 +1292,7 @@
     "type": "ShaderNodeMath"
   },
   "SubtractNode_vector": {
+	"autohide": true,
     "inputs": [
       {
         "identifier": "Vector",
@@ -1172,5 +1320,43 @@
       }
     ],
     "type": "ShaderNodeVectorMath"
+  },
+  "SubtractNode_color": {
+    "autohide": true,
+    "blend_type": "SUBTRACT",
+    "data_type": "RGBA",
+    "inputs": [
+      {
+        "identifier": "B_Float",
+        "index": 3,
+        "is_linked": true,
+        "name": "B",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Color",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "B_Color",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Color",
+        "index": 2,
+        "is_linked": true,
+        "name": "Result",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeMix"
   }
 }

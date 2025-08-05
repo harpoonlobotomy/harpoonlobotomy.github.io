@@ -2,6 +2,11 @@
 ## image texture nodes have socket-specific output.
 ## correctly identifies the componentmasknode data_type by checking the name suffix (x/xy/etc)
 
+
+## Need to add the function of it checking if an image texture node has a uv input (used), and if so, use the 'w/uv' version of the image texture group.
+##Also need to add reverse tracking for 'componentmask_w'; I can't get A from RGB or 4-channel vector, so need to pipe this directly. Maybe add this at the
+# mat-gen stage instead of here, but noting it here anyway.
+
 import json
 from collections import defaultdict, deque
 import re
@@ -15,7 +20,8 @@ node_type_behaviour = {
     "normal": "vector",
     "Texture2DNode": "color",
     "ConstantVector3Node": "color",
-    "position": "vector"
+    "position": "vector",
+    "LengthNode": "scalar"
 }
 
 enum_behaviour = {
@@ -62,9 +68,10 @@ def assign_locked_types(chains, node_data_type_map):
 
                 if match:
                     mask = match.group(1)
-                    if len(mask) > 1:
+                    if len(mask) == 3:
+                        forced_type = "color"
+                    if len(mask) == 2:
                         forced_type = "vector"
-
                     if len(mask) == 1:
                         forced_type = "scalar"
 
@@ -72,8 +79,8 @@ def assign_locked_types(chains, node_data_type_map):
                         node_data_type_map[nid] = forced_type
                         locked_nodes.add(nid)
 
-            if "componentmasknode" in node_type_name.lower():
-                print(f"{node_type_name} is {forced_type}")
+            #if "componentmasknode" in node_type_name.lower():
+            #    print(f"{node_type_name} is {forced_type}")
 
     return locked_nodes
 
@@ -95,7 +102,7 @@ def assign_enum_socket_type(chains):
         for socket_key, enum_key in [("From_Socket", "From_Socket_Enum"), ("To_Socket", "To_Socket_Enum")]:
             sid = conn.get(socket_key)
             enum = conn.get(enum_key, "")
-            #print(f"{sid}, {enum}")
+        #    print(f"{sid}, {enum}")
             if sid and enum:
                 socket_type_map[sid] = enum
                 return
@@ -104,10 +111,10 @@ def assign_enum_socket_type(chains):
         #print(f"{sid}: {enum}")
 
 def merge_input_types(inputs):
-    if "vector" in inputs:
-        return "vector"
     if "color" in inputs:
         return "color"
+    if "vector" in inputs:
+        return "vector"
         return "scalar"
 
 def iterative_type_propagation(chains, locked_nodes, node_data_type_map):
@@ -115,7 +122,6 @@ def iterative_type_propagation(chains, locked_nodes, node_data_type_map):
     node_input_types = defaultdict(list)
     node_arrival_count = defaultdict(int)
     socket_type_map = assign_enum_socket_type(chains)
-
     work_queue = deque()
 
     # Initialize queue with nodes that have locked types
@@ -137,51 +143,43 @@ def iterative_type_propagation(chains, locked_nodes, node_data_type_map):
 
         for conn in output_map.get(current, []):
             to_node = conn["To_Node"]
+            from_socket = conn.get("From_Socket_ID", "?")
+            to_socket = conn.get("To_Socket_ID", "?")
 
             if to_node in locked_nodes:
                 continue
 
-            # Base type from current node
             connection_type = current_type
-
             from_node_type = conn.get("From_Node_Type_Name", "")
+            enum = conn.get("From_Socket_Enum", "")
             from_socket_names = {
                 conn.get("From_Socket_Name", ""),
                 conn.get("From_Internal_Socket", "")
             }
-        #--------- socket name override ------------
-            from_socket_names = {
-                conn.get("From_Socket_Name", ""),
-                conn.get("From_Internal_Socket", "")
-                }
+
+            # Socket name override
             socket_override_type = socket_name_behaviour(from_socket_names)
             if socket_override_type:
                 connection_type = socket_override_type
-                #print(f"{from_node_type} overwritten by socket of type {socket_override_type}")
 
-            #=================
-            # Enum-based override
-            from_socket_names = {
-                conn.get("From_Socket_Name", ""),
-                conn.get("From_Internal_Socket", "")
-                }
-            from_node_type = conn.get("From_Node_Type_Name", "")
-            enum = conn.get("From_Socket_Enum", "")
+            # Enum override, with Color heuristic
             enum_override_type = enum_behaviour.get(enum.lower())
             if enum_override_type:
-                connection_type = enum_override_type
-                #print(f"Enum Override for {from_node_type}, {enum_override_type}: {connection_type}")
+                if "color" in from_node_type.lower():
+                    connection_type = "color"
+                else:
+                    connection_type = enum_override_type
 
-            # Special socket override for Texture2DNode -----------
-
+            # Special socket override (e.g., Texture2DNode heuristics)
             override_type = override_type_by_socket(from_node_type, from_socket_names)
             if override_type:
                 connection_type = override_type
-                #print(f"{from_node_type} Overwritten by socket_type")
 
+            # Track input types
             node_input_types[to_node].append(connection_type)
             node_arrival_count[to_node] += 1
 
+            # Merge all known inputs to determine best type
             merged_type = "scalar"
             for t in node_input_types[to_node]:
                 if precedence[t] > precedence[merged_type]:
@@ -191,8 +189,6 @@ def iterative_type_propagation(chains, locked_nodes, node_data_type_map):
             if precedence[merged_type] > precedence[old_type]:
                 node_data_type_map[to_node] = merged_type
                 work_queue.append(to_node)
-                #print(f"{from_node_type}, {old_type}: {connection_type}")
-
 
     return node_data_type_map, node_input_types, node_arrival_count
 
@@ -264,6 +260,9 @@ def trace_structure_only(chains, node_data_type_map, locked_nodes):
 def append_type_to_node_name(original_name, data_type):
     if not original_name or not data_type or data_type == "scalar":
         return original_name
+    if original_name == "MaterialNode / Material":
+        parts = original_name.split("/")
+        return parts[0]
     parts = original_name.split("/")
     parts[0] = parts[0].strip() + f"_{data_type}"
     return " / ".join(parts)
@@ -313,7 +312,7 @@ def run(input_file: str, output_file: str):
     with open(output_file, "w") as f:
         json.dump(traced, f, indent=2)
 
-    print("Done.")
+    #print("Done.")
 
 if __name__ == "__main__":
     import sys
