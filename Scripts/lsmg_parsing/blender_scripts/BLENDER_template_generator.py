@@ -1,11 +1,9 @@
-##--- Current vers in blender.
-## Need to fix shell nodegroups' socket allocations, and fix autohide by nodegroup data.
-# potentially needlessly resorts the connections data. Seems to actually be okay as it was now, have fixed enough other things.
-# 5/8/25 - setting up for the nodegroup-block node replacement + wiring setup. Doing it separately from the regular nodegroups.
+## 10/8/25 - replaces node sequences with nodegroups if found - need to add a bool to turn this behaviour off,
+#either if desired or if the the nodeblock is not found in the nodegroups file.
 
-## Want to edit how it interprets names in the exported nodegroups; want to add a [type] suffix (optional) to be able to specify socket type if desired.
-## Currently neither nodegroups or native nodes record socket type. Probably should...
-## Also, currently the nodegroup detection relies on nodegroup flag, not presence in the nodegroup file. Could change it to make nodegen key set and compare against that, instead of requiring reprocessing of input files
+# Still need to update the stage 2 parser; one node from base_skin is missing both name and type, so it just doesn't generate.
+
+## Node shells are now created correctly.
 
 # Written for Blender vers 4.3
 #harpoonlobotomy
@@ -18,20 +16,24 @@ from collections import Counter
 from collections import defaultdict
 import importlib
 import re
+from datetime import datetime
+from pprint import pprint
 
 counts = Counter()
+## F:\test\wrapper_script_test_output_changing_parser1\stage_5_tmp_CHAR_Skin_Body.json
 
-template_name = "test_temp_gen_redux"
-delete_nodes = False
-# === CONFIG: Path to the new JSON node structure ===
-MAIN_JSON_PATH = r"F:\test\wrapper_script_test_output6\stage_5_tmp_CHAR_BASE_VT.json"
-#MAIN_JSON_PATH = r"F:\test\wrapper_script_test_output6\stage_5_tmp_BASE_Tile_VT.json"
+delete_nodes = True
+node_id_labels = False
 
+template_name = "CHAR_BASE_VT_after_changing_parser_w_ngblocks"
+# === CONFIG===
+#MAIN_JSON_PATH = r"F:\test\wrapper_script_test_output6\stage_5_output_w_node_sequence_CHAR_BASE_VT_03.json"
+MAIN_JSON_PATH = r"F:\test\wrapper_script_test_output_changing_parser1\stage_5_tmp_CHAR_Skin_Body.json"
 
 node_instance_map = {}  # key: node_id (int), value: actual Blender node instance
 global_socket_map = {} # global_socket_map[node_id][socket_id] = socket
 
-NODEGROUP_JSON_PATH = r"F:\Python_Scripts\Blender Scripts\frame_exported_nodegroups_4.json"
+NODEGROUP_JSON_PATH = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI_changing_things_8_8_25\frame_exported_nodegroups_6.json"
 
 COLOR_NAME_TO_TAG = {
     "none": "NONE",
@@ -48,13 +50,14 @@ COLOR_NAME_TO_TAG = {
 # Define which groups are active --------------  debug_print(["node_setup", "summary"], "Node info...") <- square brackets to put the print in multiple groups.
 DEBUG_GROUPS = {
     "native_nodes": False,
-    "nodegroup_creation": False,
-    "nodegroup_setup": False,
+    "nodegroup_creation": True,
+    "nodegroup_setup": True,
     "errors": True,
     "sockets": False,
     "other": False,
     "links": False,
-    "nodegroup_connectors": False
+    "nodegroup_connectors": False,
+    "4ch_requirements": True
 }
 
 used_connectors = set()
@@ -104,7 +107,7 @@ def set_reroute_type(node_instance, node_tree, node_type):
         temp_nodes.add(value_node)
         node_tree.links.new(value_node.outputs[0], reroute.inputs[0])
 
-def map_native_connectors(node_type, node_id, node_instance, connectors_json, connectionsock, node_tree):
+def map_native_connectors(node_type, node_id, node_instance, connectors_json, node_tree):
     mapping = {}
 
     if "PassthroughNode" in node_type:
@@ -116,10 +119,6 @@ def map_native_connectors(node_type, node_id, node_instance, connectors_json, co
 
     from_id = [conn.get("from_socket") for conn in connections_list]
     to_id = [conn.get("to_socket") for conn in connections_list]
-
-
-    if node_id == "98":
-        print(f"to Id 98, input sockets: {input_sockets}, {to_id}")
 
     for conn in connectors_json:
         socket_id = conn.get("Socket_Id")
@@ -150,6 +149,7 @@ def map_native_connectors(node_type, node_id, node_instance, connectors_json, co
                 continue
 
             index = conn.get("blender_index")
+            conn_2 = conn.get("Conn_name_2")
             socket = None
 
             if index is not None:
@@ -164,13 +164,11 @@ def map_native_connectors(node_type, node_id, node_instance, connectors_json, co
                 except (IndexError, ValueError):
                     print(f"[Warning] Invalid socket index {index}, at socket {socket_id} on node {node_id} // {node_instance.name}")
             else:
-                print(f"[Warning] Missing index for connector: {conn}")
-                if index is None:
-                    elif len(relevant_sockets) == 1:
-                            for sock in relevant_sockets:
-                                mapping[conn["Socket_Id"]] = sock
-                            print(f"Only one socket for {node_id}")
-
+                if "Combine" in node_type and conn_2 == "Value4":
+                    debug_print("4ch_requirements", f"Socket {conn_2}/{socket_id} is {node_type} - ignore.")
+### # NOTE: Add the autocheck for alpha input options
+                else:
+                    print(f"[Warning] Missing index for connector: {conn}")
             socket_id = conn.get("Socket_Id")
             if socket_id is None:
                 print(f"[Warning] Connector missing Socket_Id: {conn}")
@@ -183,34 +181,56 @@ def map_native_connectors(node_type, node_id, node_instance, connectors_json, co
         traceback.print_exc()
     return mapping
 
-def map_connections(connectionsock, connectors_json, sockets_internal, node_id, node_instance, blender_sockets, nodegroup_in_out, node_type, connections_list, used_connectors):
+def map_connections(connectors_json, sockets_internal, node_id, node_instance, blender_sockets, node_type, connections_list, used_connectors):
     mapping = {}
     node_id = node_id
+
+    is_pattern = False
+    if node_type in node_id:
+        is_pattern = True
 
     valid_input_sockets = {s.name for s in node_instance.inputs}
     valid_output_sockets = {s.name for s in node_instance.outputs}
 
-    if node_id == "22":
-        print(set(valid_output_sockets))
-
     input_sockets = list(node_instance.inputs)
     output_sockets = list(node_instance.outputs)
-    if node_id == "22":
-        print(f"Output Sockets: {output_sockets}, ()")
 
 ## -----------   Get 'used_connectors' set first -------------
     from_id = [conn.get("from_socket") for conn in connections_list]
     to_id = [conn.get("to_socket") for conn in connections_list]
 
-    print(f"{output_sockets} : {from_id}")
+    #print(f"{output_sockets} : {from_id}")
+
+    from_pattern_sockets = []
+    to_pattern_sockets = []
+
+    pattern_socket_ids = set()
+
+    for node_id, node_data in nodes_json.items():
+        if node_data.get("Is_Pattern"):
+            outputs = node_data.get("m_Outputs", {})
+            connectors = outputs.get("Connectors", [])
+            for conn in connectors:
+                socket_id = conn.get("Socket_Id")
+                if socket_id is not None:
+                    pattern_socket_ids.add(str(socket_id))
+            inputs = node_data.get("m_Inputs", {})
+            connectors = inputs.get("Connectors", [])
+            for conn in connectors:
+                socket_id = conn.get("Socket_Id")
+                #print(f"{socket_id}")
+                if socket_id is not None:
+                    pattern_socket_ids.add(str(socket_id))
+                    #print(f"Assigned from_pattern_sockets:, {pattern_socket_ids}")
 
     for conn in connectors_json:
         key = None
         socket_id = conn.get("Socket_Id")
 
-        if socket_id in from_id:
+        if socket_id in from_id or socket_id in to_id:
             used_connectors.add(socket_id)
-        elif socket_id in to_id:
+
+        if socket_id in pattern_socket_ids:
             used_connectors.add(socket_id)
 
 ## ----------- Now actually start matching sockets -------------
@@ -234,12 +254,17 @@ def map_connections(connectionsock, connectors_json, sockets_internal, node_id, 
 
             key = None
             socket_id = conn.get("Socket_Id")
-            conn_name = conn.get("Conn_Name")
-            conn_2 = conn.get("Conn_name_2")
+
+            if socket_id in pattern_socket_ids:
+                conn_name = f"{conn.get('Conn_name_2') or ''}/{conn.get('Conn_Name') or ''}"
+                conn_2 = conn.get("Conn_Name")
+            else:
+                conn_name = conn.get("Conn_Name") #----------------------------------Add the above back in
+                conn_2 = conn.get("Conn_name_2")
+
             int_out = None
             int_in = None
             only_sock = None
-
             socket = None
 
             for ic in sockets_internal:
@@ -264,13 +289,6 @@ def map_connections(connectionsock, connectors_json, sockets_internal, node_id, 
                     if normalize_name(sock.name) == normalize_name(conn_name):
                         socket = sock
                         break
-
-            elif len(valid_sockets) == 1:
-                    for sock in relevant_sockets:
-                        socket = sock
-                    print(f"Only one socket for {node_id}")
-
-
             else:
                 print(f"Skipping unused or missing socket: {conn.get('Socket_Id')} - not present on this node, {node_id}")
 
@@ -294,14 +312,16 @@ def map_socket_ids_to_blender_sockets(nodes_json, node_instance, nodegroup_json_
     to_sock = [conn.get("from_socket") for conn in connections_list]
     inputs_internal = [ic for ic in nodes_json.get("Internal_Connectors", []) if ic.get("Socket", "").startswith("m_Input")]
     outputs_internal = [ic for ic in nodes_json.get("Internal_Connectors", []) if ic.get("Socket", "").startswith("m_Output")]
+
+    is_nodeblock = "ng_block" in nodes_json
     is_native = "Blender_type" in nodes_json
 
-    if is_native:
-        inputs = map_native_connectors(node_type, node_id, node_instance, nodes_json.get("m_Inputs", {}).get("Connectors", []), to_sock, node_tree)
-        outputs = map_native_connectors(node_type, node_id, node_instance, nodes_json.get("m_Outputs", {}).get("Connectors", []), from_sock, node_tree)
+    if is_native and not is_nodeblock:
+        inputs = map_native_connectors(node_type, node_id, node_instance, nodes_json.get("m_Inputs", {}).get("Connectors", []), node_tree)
+        outputs = map_native_connectors(node_type, node_id, node_instance, nodes_json.get("m_Outputs", {}).get("Connectors", []), node_tree)
     else:
-        inputs = map_connections(to_sock, nodes_json.get("m_Inputs", {}).get("Connectors", []), inputs_internal, node_id, node_instance, node_instance.inputs, nodegroup_json_data.get("inputs"), node_type, connections_list, used_connectors)
-        outputs = map_connections(from_sock, nodes_json.get("m_Outputs", {}).get("Connectors", []), outputs_internal, node_id, node_instance, node_instance.outputs, nodegroup_json_data.get("outputs"), node_type, connections_list, used_connectors)
+        inputs = map_connections(nodes_json.get("m_Inputs", {}).get("Connectors", []), inputs_internal, node_id, node_instance, node_instance.inputs, node_type, connections_list, used_connectors)
+        outputs = map_connections(nodes_json.get("m_Outputs", {}).get("Connectors", []), outputs_internal, node_id, node_instance, node_instance.outputs, node_type, connections_list, used_connectors)
 
     if node_id not in global_socket_map:
         global_socket_map[node_id] = {}
@@ -314,19 +334,40 @@ def map_socket_ids_to_blender_sockets(nodes_json, node_instance, nodegroup_json_
 
 def create_shell_nodegroup(group_name, nodes_json): #----   Is just a hollow placeholder if node not found in native or nodegroup documents
 #                                                    ---- Should have the required number of sockets; seems to now.
+    typename = None
+    nodename = None
+    for entry in nodes_json:
+        if entry == "Node_Type":
+            node_type = nodes_json.get("Node_Type")
+            if node_type != "":
+                if node_id_labels is True:
+                    typename = group_name + "_" + node_type
+                else:
+                    typename = node_type
+
+    for entry in nodes_json:
+        if entry == "Node_Name":
+            node_name = nodes_json.get("Node_Name")
+            if node_name != "":
+                if node_id_labels is True:
+                    nodename = "[" + group_name + "]" + node_name
+                else:
+                    nodename = node_name
+
+    if nodename:
+        group_name = nodename
+    else:
+        if typename:
+            group_name = typename
+
     outputs = nodes_json.get("m_Outputs", {})
     inputs = nodes_json.get("m_Inputs", {})
 
-    print("Checking outputs for", group_name, ":", outputs)
-    for conn in outputs.get("Connectors", []):
-        print(f"{conn}")
-
-    # Create new ShaderNodeTree
+    # Create new nodetreeree
     nodegroup = bpy.data.node_groups.new(group_name, 'ShaderNodeTree')
     nodegroup.use_fake_user = True
     nodegroup["label"] = group_name
 
-    # Add Group Input/Output nodes
     group_input = nodegroup.nodes.new('NodeGroupInput')
     group_input.location = (-350, 0)
     group_input.label = "Group Input"
@@ -356,7 +397,6 @@ def create_shell_nodegroup(group_name, nodes_json): #----   Is just a hollow pla
 
     # Add interface OUTPUT sockets
     for conn in nodes_json.get("m_Outputs", {}).get("Connectors", []):
-        print("literally anything")
         sock_name = conn.get("Conn_Name") or conn.get("Conn_name_2") or "Output"
         if sock_name and sock_name not in nodegroup.interface.items_tree:
             nodegroup.interface.new_socket(
@@ -364,39 +404,47 @@ def create_shell_nodegroup(group_name, nodes_json): #----   Is just a hollow pla
                 in_out='OUTPUT',
                 socket_type='NodeSocketFloat'
             )
-
     return nodegroup
 
 def get_node_sets(nodes_json):
     blendernative_entries = []
     nodegroup_entries = []
+    ng_block_node_entries = []
+    pattern_entries = []
     ng_block = []
     optional_keys = [
         "Node_Type", "Blender_type", "Data_Type", "Blend_Type", "Node_Name",
-        "Blender_Operation", "d2p1_Attributes", "Location", "Autohide", "Is_NodeGroup"]
+        "Blender_Operation", "d2p1_Attributes", "Location", "Autohide", "Is_NodeGroup",
+        "ng_block", "ng_block_role", "ng_block_state"]
 
     for node_id, node_data in nodes_json.items():
         node_entry = {"node_id": node_id}
         for key in optional_keys:
             if key in node_data:
                 node_entry[key] = node_data[key]
-        if "Blender_type" in node_data:
-            blendernative_entries.append(node_entry)
-          #  print(f"native node {node_id}")
-            debug_print("native_nodes", f"Native node found: {node_id}")
+
+        if "ng_block" in node_data:
+            ng_block_node_entries.append(node_entry)
+            #debug_print("ng_block_setup", f"NG block component found: {node_id}")
+#            print(f"NG block component found: {node_id}")
+        elif "Is_Pattern" in node_data:
+            print(f"{node_id} found by the pattern")
+            pattern_entries.append(node_entry)
+            #ng_block_node_entries.append(node_entry)
+#            print(f"nodegroup {node_id}")
         elif "Is_NodeGroup" in node_data:
             nodegroup_entries.append(node_entry)
-            debug_print("nodegroup_setup", f"Nodegroup found: {node_id}")
-          #  print(f"nodegroup {node_id}")
-        elif "ng_block" in node_data:
-            ng_block_entries.append(node_entry)
-            debug_print("ng_block_setup", f"NG block component found: {node_id}")
-
-
+            #print(f"{node_id} found by the nodegroup")
+            #debug_print("nodegroup_setup", f"Nodegroup found: {node_id}")
+        elif "Blender_type" in node_data:
+            blendernative_entries.append(node_entry)
+            #print(f"native node {node_id}")
+#            debug_print("native_nodes", f"Native node found: {node_id}")
+        else:
             nodegroup_entries.append(node_entry) ##=== make a new one inside here.
-            print(f"Not nodegroup or native: {node_id}")
+            #print(f"Not nodegroup or native: {node_id}")
 
-    return blendernative_entries, nodegroup_entries
+    return blendernative_entries, nodegroup_entries, ng_block_node_entries, pattern_entries
 
 def get_correct_native_nodes(blendernative_entries, node_tree, nodes_json, nodegroup_json_data, connections_list):
 
@@ -426,22 +474,18 @@ def get_correct_native_nodes(blendernative_entries, node_tree, nodes_json, nodeg
 
             node = node_tree.nodes.new(blender_type)
             node_instance_map[node_id] = node
-            #counts["Added to node_instance_map"] += 1
             node.location = loc
 
-            # Operation enum
             if op and hasattr(node, "operation"):
                 valid_ops = [item.identifier for item in node.bl_rna.properties["operation"].enum_items]
                 if op in valid_ops:
                     node.operation = op
 
-            # Data type enum
             if datatype and hasattr(node, "data_type"):
                 datas = [item.identifier for item in node.bl_rna.properties["data_type"].enum_items]
                 if datatype in datas:
                     node.data_type = datatype
 
-            # Blend type enum
             if blendtype and hasattr(node, "blend_type"):
                 blends = [item.identifier for item in node.bl_rna.properties["blend_type"].enum_items]
                 if blendtype in blends:
@@ -454,8 +498,6 @@ def get_correct_native_nodes(blendernative_entries, node_tree, nodes_json, nodeg
             print(f"native node failure for {node_id}")
             debug_print(["native_nodes", "errors"], f"[Warning] Could not create node '{blender_type}': {e}")
 
-        #    print(f"Location set to: {loc}, has operation {op}, is datatype: {datatype}, blendtype is {blendtype}")#" - and might have autohide? ..{autohide}..")
-
         if param_name is not None:
             param_label = str(param_name)
             node.label = param_label
@@ -464,7 +506,10 @@ def get_correct_native_nodes(blendernative_entries, node_tree, nodes_json, nodeg
             param_label = str(node_name)
             node.label = param_label
 
-        node.label = f"[{node_id}][{node_type}]" #----------------- debug node.label delete later
+        if node_id_labels == True:
+            node.label = "[" + node_id + "]" + node_name
+        else:
+            node.label = node_name
 
         if autohide:
             node.hide = True
@@ -472,12 +517,8 @@ def get_correct_native_nodes(blendernative_entries, node_tree, nodes_json, nodeg
         val = float(1)
         valvec = (1, 1, 1)
         if blendtype and hasattr(node, "blend_type"):
-        #    print("Blendtype")
             for sock in node.inputs:  # sock is each input socket
-                #print(f"{sock.identifier}//{sock.name}")
-                #print Check by name or identifier
                 if sock.identifier == "Factor_Float":  # or sock.identifier if you prefer
-                    # Only set default_value if not linked
                     sock.default_value = val
                 elif sock.identifier == "Factor_Vector":
                     sock.default_value = valvec
@@ -517,26 +558,48 @@ def set_up_nodegroups(nodegroup_entries, node_tree, nodes_json, nodegroup_json_d
         node_name = entry.get("Node_Name")
         node_type = entry.get("Node_Type")
         autohide = entry.get("autohide")
-        debug_print("nodegroup_setup", f"Starting new nodegroup entry: {node_id} {node_type}")
-        is_nodegroup = entry.get("Is_NodeGroup")
+        #debug_print("nodegroup_setup", f"Starting new nodegroup entry: {node_id} {node_type}")
+        if node_name in node_id:
+            if node_name == "":
+                is_nodegroup = entry.get("Is_NodeGroup")
+            else:
+                is_nodegroup = True
+        else:
+            is_nodegroup = entry.get("Is_NodeGroup")
         loc_raw = entry.get("Location", {})
         param_name = entry.get("d2p1_Attributes", {}).get("ParameterName")
 
-        x = loc_raw.get("x", 0.0)
-        y = loc_raw.get("y", 0.0)
-        x = x*-1
-        y = y*-1
-        loc = (x, y)
+        if node_name == "VT_Layers_4ch":
+            loc = loc_raw
+        else:
+            loc_raw = entry.get("Location", {})
+
+            x = loc_raw.get("x", 0.0)
+            y = loc_raw.get("y", 0.0)
+            x = x*-1
+            y = y*-1
+            loc = (x, y)
+
+        if node_type == "":
+            #print(f"No node type found for {node_id}.")
+            if node_name != "":
+                #print(f"But it has a name: {node_name}.")
+                node_type = node_name
+
+                #print(f"So now it's node_type is {node_name}.")
+            else:
+                node_type = "Node_Type_Missing"
+                node_name = "Node_Name_Missing"
+                print("Missing node, no number, no name.")
 
         try:
             if node_type == "Texture2DNode_color":
+                #print(f"Node name: {node_type}")
                 node_name = node_name
             else:
                 node_name = node_type
 
-            if is_nodegroup is None:
-                node_data = entry
-                print(f"Not a real nodegroup: {node_id}//{node_name}, {node_data}")
+            if is_nodegroup is None or is_nodegroup is False:
                 node_group = create_shell_nodegroup(node_id, nodes_json[node_id])
                 created_groups[node_name] = node_group
             else:
@@ -546,9 +609,11 @@ def set_up_nodegroups(nodegroup_entries, node_tree, nodes_json, nodegroup_json_d
                     if node_name in created_groups:
                         node_group = created_groups[node_name]
                     else:
+                        #print(f"Sending {node_name}{node_id} to create nodegroup.")
                         node_group = create_nodegroup_from_ng_data(node_name, node_type, ng_data, entry.get("node_id"), connections_list)
                         created_groups[node_name] = node_group
 
+            #print(f"About to make {entry} an instanced nodegroup")
             node = node_tree.nodes.new("ShaderNodeGroup")
             node.node_tree = node_group
             autohide = ng_data.get("autohide", False)
@@ -558,17 +623,125 @@ def set_up_nodegroups(nodegroup_entries, node_tree, nodes_json, nodegroup_json_d
             node.location = loc
             node.name = f"[{node_id}][{node_type}]"
             node_instance_map[node_id] = node  # Track for later linking etc.
-            debug_print(["nodegroup_setup", "error"], f"Sending nodegroup {node_type} to get socket data...")
+            #debug_print(["nodegroup_setup", "error"], f"Sending nodegroup {node_type} to get socket data...")
             node_data = nodes_json[node_id]
             map_socket_ids_to_blender_sockets(node_data, node, nodegroup_json_data, connections_list, node_tree)
 
-            debug_print("nodegroup_setup", f"Recorded nodegroup {node_id} to socket map")
+            #debug_print("nodegroup_setup", f"Recorded nodegroup {node_id} to socket map")
 
         except Exception as e:
             print(f"nodegroup failure for {node_id}: {e}")
             #debug_print(["nodegroup_setup", "errors"], f"[Exception] Failed to instance nodegroup for {node_id}/{node_type}: {e}")
 
-def set_up_ng_blocks(nodes_json, nodegroup_json_data):
+def set_up_ng_blocks(ng_block_node_entries, nodes_json, nodegroup_json_data, connections_list, node_tree, pattern):
+
+    if not ng_block_node_entries:
+        return
+
+    from collections import defaultdict
+    ng_groups = set()
+    ng_group_data = {}
+    position_sums = defaultdict(lambda: [0.0, 0.0])
+    counts = defaultdict(int)
+
+    for entry in ng_block_node_entries:
+        node = None
+        node_id = entry.get("node_id")
+        #print(f"Node in ng_block_node_entries: {node_id}")
+        loc_raw = entry.get("Location", {})
+        x = loc_raw.get("x", 0.0) * -1
+        y = loc_raw.get("y", 0.0) * -1
+        ng_block = entry.get("ng_block")
+        ng_block_role = entry.get("ng_block_role")
+        ng_block_state = entry.get("ng_block_state")
+        is_pattern = entry.get("Is_Pattern")
+
+        #print(f"Node ID: {node_id} / node block: {ng_block} / location: {loc_raw}")
+        if ng_block not in ng_groups:
+            if ng_block == None:
+                print("ng_block is none")
+            else:
+                ng_groups.add(ng_block)
+                #print(f"Added {ng_block} to ng_groups.")
+
+        #print(f"node_id: {node_id}.")
+#--- Location averaging
+        position_sums[ng_block][0] += x
+        position_sums[ng_block][1] += y
+        counts[ng_block] += 1
+
+    avg_position = {}
+
+    for ng_block, (sum_x, sum_y) in position_sums.items():
+        print(f"Getting location from the block for {ng_block}")
+        count = counts[ng_block]
+        if count > 0:
+            avg_position[ng_block] = (sum_x / count, sum_y / count)
+            ng_group_data["Location"] = avg_position
+        else:
+            print("Could not get average, using 0,0")
+            avg_position[ng_block] = (0.0, 0.0)
+
+    return ng_group_data
+
+def generate_pattern_nodegroup(pattern_entries, ng_group_data, nodegroup_json_data):
+    from pprint import pprint
+    #pprint(ng_group_data)
+    pattern_node_entries = []
+    for entry in pattern_entries:
+        id = entry["node_id"]
+        type = entry["Node_Name"]
+        location = ng_group_data["Location"][id]
+
+        node_entry = {
+            "node_id": id,
+            "Node_Name": type,
+            "Node_Type": type,
+            "Is_Nodegroup": True,
+            "Location": location
+        }
+        pattern_node_entries.append(node_entry)
+
+    return pattern_node_entries
+
+def log_missing_node(node_data):
+
+    log_path = "F:\Python_Scripts\Blender Scripts\missing_nodes_from_template_gen.json"
+    # Load existing data if file exists
+    if os.path.exists(log_path):
+        with open(log_path, "r") as f:
+            try:
+                existing_data = json.load(f)
+            except json.JSONDecodeError:
+                existing_data = []
+    else:
+        existing_data = []
+
+    # Check if Node_Type already exists in the list
+    existing_types = {entry.get("Node_Type") for entry in existing_data}
+    existing_ids = {entry.get("node_id") for entry in existing_data}
+    should_log = False
+    node_type = node_data.get("Node_Type")
+    node_id = node_data.get("node_id")
+    #print(f"Node ID: {node_id}, node type: {node_type} being tested as empty.")
+
+    if node_type == "":
+        if node_id not in existing_ids:
+            print("No Node_Type found but new ID {node_id}. Recording anyway:")
+            should_log = True
+        else:
+            print(f"Nodetype blank, but ID {node_id} is in existing IDs; skipping.")
+    elif node_type not in existing_types:
+        print("Logged missing node:", node_type)
+        should_log = True
+
+    if should_log:
+        existing_data.append(node_data)
+        with open(log_path, "w") as f:
+            json.dump(existing_data, f, indent=2)
+        print("Logged missing node:", node_data["Node_Type"])
+    #else:
+        #print("Node_Type already logged:", node_data["Node_Type"])
 
 def find_socket_by_identifier_or_name(node, identifier_or_name, is_input=True):
     sockets = node.inputs if is_input else node.outputs
@@ -581,9 +754,12 @@ def find_socket_by_identifier_or_name(node, identifier_or_name, is_input=True):
 
 def create_nodegroup_from_ng_data(name, node_type, ng_data, node_id, connections_list):
 
-    ng_name = name
-    debug_print("nodegroup_creation", f"Creating {ng_name}")
-    # Create new node group
+    if node_id_labels == True:
+        ng_name = "[" + node_id + "]" + name
+    else:
+        ng_name = name
+
+    #debug_print("nodegroup_creation", f"Creating {ng_name}")
     node_group = bpy.data.node_groups.new(ng_name, 'ShaderNodeTree')
 
     # === Color tag ===
@@ -606,6 +782,8 @@ def create_nodegroup_from_ng_data(name, node_type, ng_data, node_id, connections
         operation = node_def.get("operation", None)
         blend_type = node_def.get("blend_type", None)
         data_type = node_def.get("data_type", None)
+        default_value = node_def.get("default_value", 0.0)
+        label = node_def.get("label")
 
         try:
             node = node_group.nodes.new(type=node_type)
@@ -629,35 +807,44 @@ def create_nodegroup_from_ng_data(name, node_type, ng_data, node_id, connections
 
             name_to_node[node_name] = node
 
+            #debug_print("nodegroup_creation", f"About to attempt default values for {ng_name}")
+            if node_type == "ShaderNodeValue":
+                #print("found value node")
+                if default_value:
+                    #print("Default value found for this node:")
+                    #print(node_name)
+                    #print(default_value)
+                    try:
+                        val = float(default_value)
+                        node.outputs[0].default_value = val
+                        #print(f"[Set] ShaderNodeValue {node_id} value set to {val}")
+                    except ValueError:
+                        debug_print(["native_nodes", "errors"], f"Warning: X value '{x_str}' is not a valid number.")
+
             for sock_name, val in node_def.get("default_values", {}).items():
-                if not group_input or group_output:
-                    debug_print(["nodegroup_creation", "sockets"], f"default value on group in/output for {node_type}")
-                    debug_print(["nodegroup_creation", "sockets"], f"Looking for sock name: {sock_name}")
-                    socket = find_socket_by_identifier_or_name(node, sock_name, is_input=True)
-                    if socket:
-                        debug_print(["nodegroup_creation", "sockets"], f"[DEBUG] Socket match: {node.name}.{socket.identifier}, linked={socket.is_linked}, has default={hasattr(socket, 'default_value')}")
-                    else:
-                        debug_print(["nodegroup_creation", "sockets", "errors"], f"[WARN] Socket not found: {node.name}.{sock_name}")
-                    if socket and not socket.is_linked and hasattr(socket, "default_value"):
+                #print(f"Node `{node_name}`: socket `{sock_name}`: default value `{val}`")
+                socket = find_socket_by_identifier_or_name(node, sock_name, is_input=True)
+                if not socket:
+                    #print(f"socket not found by name or identifier for {node_name}, {sock_name}")
+                    if node_type == "ShaderNodeValue":
+                        socket = find_socket_by_identifier_or_name(node, sock_name, is_input=False)
+
+                if socket:
+                    #print(f"Socket `{sock_name}` found on node `{node_name}`")
+                    if not socket.is_linked and hasattr(socket, "default_value"):
                         try:
                             socket.default_value = val
-                            debug_print(["nodegroup_creation", "sockets"], f"[[DEBUG] Set default on {node.name}.{socket.identifier}: {val}")
+                            #print(f"Set default value `{val}` on socket `{sock_name}` of node `{node_name}`")
                         except Exception as e:
-                            debug_print(["nodegroup_creation", "sockets", "errors"], f"[[WARN] Failed to set default on {node.name}.{socket.identifier}: {e}")
-            for sock_name, val in node_def.get("default_values", {}).items():
-                debug_print("sockets", f"Looking for sock name: {sock_name}")
-                socket = find_socket_by_identifier_or_name(node, sock_name, is_input=True)
-                if socket:
-                    debug_print(["nodegroup_creation", "sockets"], f"[DEBUG] Socket match: {node.name}.{socket.identifier}, linked={socket.is_linked}, has default={hasattr(socket, 'default_value')}")
-                else:
-                    debug_print(["nodegroup_creation", "sockets", "errors"], f"[WARN] Socket not found: {node.name}.{sock_name}")
+                            debug_print(["nodegroup_creation", "sockets", "errors"], f"[WARN] Failed to set default on {node.name}.{socket.identifier}: {e}")
 
-                if socket and not socket.is_linked and hasattr(socket, "default_value"):
-                    try:
-                        socket.default_value = val
-                        debug_print(["nodegroup_creation", "sockets"], f"[DEBUG] Set default on {node.name}.{socket.identifier}: {val}")
-                    except Exception as e:
-                        debug_print(["nodegroup_creation", "sockets", "errors"], f"[WARN] Failed to set default on {node.name}.{socket.identifier}: {e}")
+## labels from split name for image textures.
+            if "ShaderNodeTexImage" in node_type:
+                if " - " in name:
+                    group, imagename = name.split(" - ", 1)
+                    node.label = imagename
+                if label:
+                    node.label = label
 
         except Exception as e:
             debug_print(["nodegroup_creation", "errors"], f"[Warning] Failed to create node {node_name}: {e}")
@@ -709,8 +896,7 @@ def create_nodegroup_from_ng_data(name, node_type, ng_data, node_id, connections
             source_socket = find_socket_by_identifier_or_name(source_node, from_sock, is_input=False)
             if source_socket:
                 inferred_socket_types[to_sock] = source_socket.bl_idname
-
-    debug_print(["nodegroup_creation", "sockets"], f"starting interface socket creation")
+    #debug_print(["nodegroup_creation", "sockets"], f"starting interface socket creation")
 
     # === Interface socket creation ===
     socket_map = {}
@@ -765,7 +951,7 @@ def create_nodegroup_from_ng_data(name, node_type, ng_data, node_id, connections
         except Exception as e:
             debug_print(["links", "errors"], f"[Warning] Failed to create link {link}: {e}")
 
-    debug_print("nodegroup_setup", "returning nodegroup")
+    #debug_print("nodegroup_setup", "returning nodegroup")
     return node_group
 
 # === Helper to build cleaned connections list ===
@@ -782,8 +968,9 @@ def build_connections_list(connections_json):
     return connections_list
 
 # === Create master material and attach ===
-def create_material_and_instance(blendernative_entries, nodegroup_entries, nodes_json, nodegroup_json_data, connections_list, connections_json):
+def create_material_and_instance(blendernative_entries, nodegroup_entries, ng_block_node_entries, pattern_entries, nodes_json, nodegroup_json_data, connections_list, connections_json):
 
+    ng_group_data = {}
     obj = bpy.context.active_object
     debug_print("errors", f"Printing Error log...")
 
@@ -798,33 +985,29 @@ def create_material_and_instance(blendernative_entries, nodegroup_entries, nodes
         obj.data.materials.append(mat)
 
     node_tree = mat.node_tree
-        # FULL CLEAR — no stale state
+        # FULL CLEAR
     node_tree.nodes.clear()
     node_tree.links.clear()
     nodes = mat.node_tree.nodes
     obj.active_material = mat
 
-
-    matout = node_tree.nodes.new('ShaderNodeOutputMaterial')
-    #matout.loc = 0, 200
-#  node_instance_map[node_id] = matout
-
     get_correct_native_nodes(blendernative_entries, node_tree, nodes_json, nodegroup_json_data, connections_list)
     set_up_nodegroups(nodegroup_entries, node_tree, nodes_json, nodegroup_json_data, connections_list)
-    create_blender_links(node_tree, connections_list, node_instance_map, global_socket_map, used_connectors)
+    ng_group_data = set_up_ng_blocks(ng_block_node_entries, nodes_json, nodegroup_json_data, connections_list, node_tree, pattern_entries)
+    pattern_node_entries = generate_pattern_nodegroup(pattern_entries, ng_group_data, nodegroup_json_data)
+    set_up_nodegroups(pattern_node_entries, node_tree, nodes_json, nodegroup_json_data, connections_list) # run again with contained node locations already found
+    missed_sockets = create_blender_links(node_tree, connections_list, node_instance_map, global_socket_map, used_connectors)
 
-
-
-    return node_tree
+    return node_tree, missed_sockets
 
 def remove_temp_nodes(node, node_tree, temp_nodes):
     for node in temp_nodes: #------------------- Note: If reroutes start failing, move this to after links are created.
         node_tree.nodes.remove(node)
     temp_nodes.clear()
 
-    # Create reverse lookup for which socket belongs to which node
 def create_blender_links(master_tree, connections_list, node_instance_map, global_socket_map, used_connectors):
 
+    missed_sockets = []
     socket_to_node = {
         socket_id: node_id
         for node_id, sockets in global_socket_map.items()
@@ -846,7 +1029,6 @@ def create_blender_links(master_tree, connections_list, node_instance_map, globa
         if not from_socket or not to_socket:
  #           print("from socket or to socket missing")
             continue
-
         try:
             master_tree.links.new(from_socket, to_socket)
         except Exception as e:
@@ -858,11 +1040,97 @@ def create_blender_links(master_tree, connections_list, node_instance_map, globa
         )
         if not actual_link_exists:
             print(f"[Warning] Link did NOT register in Blender: {from_nid}:{from_sid} ({from_socket.name}) ({from_socket.type}) > {to_nid}:{to_sid} ({to_socket.name}, ({to_socket.type}))")
+            missed_sockets.append(tuple((from_nid, from_sid, to_nid, to_sid)))
+            from pprint import pprint
 
+    return missed_sockets
+
+def try_failed_links_again(node_tree, missed_sockets, global_socket_map):
+    #This mostly exists because reroutes change when their type changes, and all this mess was to fix that. It worked, but god was it a painful afternoon.
+    socket_holding = []
+    socket_identifiers = {}
+    node_entity = None
+    node_name_dict = {}
+
+    for node_id, sockets in global_socket_map.items():
+        socket_identifiers[node_id] = {}
+        for socket_id, socket in sockets.items():
+            if socket:
+                #print(f"socket identifiers: {socket.identifier}")
+                if socket.identifier == "":
+                    print(f"socket name instead: {socket.name}")
+                    socket_identifiers[node_id][socket_id] = socket.name
+                else:
+                    socket_identifiers[node_id][socket_id] = socket.identifier
+                node_entity = socket.node
+                node_name = node_entity.name
+                node = node_tree.nodes.get(node_name)
+                node_name_dict[socket_id] = node.name
+            else:
+                print(f"Sockets for {node_id} do not exist.")
+
+    for from_nid, from_sid, to_nid, to_sid in missed_sockets:
+        from_socket_id = None
+        to_sock_id = None
+
+#node names
+        to_nodename = node_name_dict[to_sid]
+        #print(f"To node from node_name_dict: {to_nid}")
+        from_nodename = node_name_dict[from_sid]
+# node objects
+        from_node = node_tree.nodes.get(from_nodename)
+        to_node = node_tree.nodes.get(to_nodename)
+
+        #print(f"To node {to_nid} // to sock ID: {to_sid}: {to_node}")
+        to_sock_id = socket_identifiers[to_nid][to_sid]
+        #print(f"From node {from_nid} // to sock ID: {from_sid}: {from_node}")
+        from_sock_id = socket_identifiers[from_nid][from_sid]
+
+        if to_nid in socket_identifiers and to_sid in socket_identifiers[to_nid]:
+            #print(f"to_sid {to_sid} in socket identifiers for node {to_nid}")
+            to_sock_id = socket_identifiers[to_nid][to_sid]
+        if from_nid in socket_identifiers and from_sid in socket_identifiers[from_nid]:
+            #print(f"from_sid {from_sid} in socket identifiers for node {from_nid}")
+            from_sock_id = socket_identifiers[from_nid][from_sid]
+        else:
+            #print(f"No from_sid {from_sid} in socket identifiers for node {from_nid}")
+            print(f"No to_sid {to_sid} in socket identifiers for node {to_nid}")
+
+        if to_sock_id:
+            for s in to_node.inputs:
+                #print(f"Checking socket: {s}, identifier: {s.identifier}, target: {to_sock_id}")
+                if s.identifier == to_sock_id:
+                    to_socket = s
+                    #print(f"from_socket matches: {to_socket}, {s.identifier}")
+                    break
+
+        if from_sock_id:
+            for s in from_node.outputs:
+                #print(f"Checking socket: {s}, identifier: {s.identifier}, target: {from_sock_id}")
+                if s.identifier == from_sock_id:
+                    from_socket = s
+                    #print(f"from_socket matches: {from_socket}, {s.identifier}")
+                    break
+
+        try:
+            node_tree.links.new(from_socket, to_socket)
+            #print(f"Connected: {from_nid}:{from_sock_id} → {to_nid}:{to_sock_id}")
+        except Exception as e:
+            #print(f"Failed to connect: {from_nid}:{from_sock_id} → {to_nid}:{to_sock_id} because {e}")
+            print(f"Failed to connect: {from_nid}:{from_sid} → {to_nid}:{to_sid} because {e}")
+        #bpy.context.view_layer.update()
+vulture "F:\Python_Scripts\Blender Scripts\BLENDER_11_8_25_template_generator.py"
+print("\n" * 40)
+print("\n" + "="*40)
+print("=== Script run started at", datetime.now(), "===")
+print("="*40 + "\n")
+print("\n" * 2)
 
 connections_list = build_connections_list(data.get("Connections", {}))
 clear_all_ng_from_file()
-blendernative_entries, nodegroup_entries = get_node_sets(nodes_json)
-node_tree = create_material_and_instance(blendernative_entries, nodegroup_entries, nodes_json, nodegroup_json_data, connections_list, connections)
+blendernative_entries, nodegroup_entries, ng_block_node_entries, pattern_entries = get_node_sets(nodes_json)
+node_tree, missed_sockets = create_material_and_instance(blendernative_entries, nodegroup_entries, ng_block_node_entries, pattern_entries, nodes_json, nodegroup_json_data, connections_list, connections)
 remove_temp_nodes(node_instance_map, node_tree, temp_nodes)
+try_failed_links_again(node_tree, missed_sockets, global_socket_map)
+
 print("Run successful.")

@@ -249,6 +249,9 @@ def extract_parent_blocks_excluding_nested_sets(filepath, patterns):
     blocks = build_block_index(lines)
     output = []
 
+
+
+
     for pattern in patterns:
         parent_tag = pattern["tag"]
         include = pattern.get("include", None)
@@ -314,7 +317,13 @@ def run(input_path, output_path):
 
     if RUN_PARENT_EXCLUDE_NESTED:
         parent_blocks = extract_parent_blocks_excluding_nested_sets(input_path, PARENT_BLOCK_PATTERNS)
+        # Filter blocks where the content (2nd item in the tuple) has more than 1 line
+        parent_blocks = [b for b in parent_blocks if len(b[1].strip().splitlines()) > 1]
+
         output_blocks.extend(parent_blocks)
+
+
+
 
     if output_blocks:
         if ENABLE_TRIM_ENDTAGS:
@@ -326,6 +335,9 @@ def run(input_path, output_path):
             output_text += block + "\n\n"
 
         if output_path:
+
+            # Strip leading whitespace per line
+            output_text = "\n".join(line.lstrip() for line in output_text.splitlines())
             with open(output_path, "w", encoding="utf-8") as out:
                 out.write(output_text)
 

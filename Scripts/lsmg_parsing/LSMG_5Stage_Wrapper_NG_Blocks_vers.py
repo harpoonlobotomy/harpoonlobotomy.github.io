@@ -1,10 +1,10 @@
 ## To run:
 
-# python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_2.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_BASE_VT.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output4" --start-at 3
+# python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\InstancePaint\IP_Wind_GrassFlowers_AlphaTest_2S_PBR_VT.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output4" --start-at 3
 ## command prompt: python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_json_not_txt.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_Fur.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output3"
 #or
 ## command prompt: python LSMG_5Stage_Wrapper.py CHAR_Fur.lsmg --temp-dir wrapper_script_test_output
-
+#python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "Public/" --named-temp --temp-dir "F:\test\wrapper_script_test_output4" --start-at 3
 import os
 import sys
 import importlib.util
@@ -35,8 +35,10 @@ def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_ou
     LSMG_stage1_xml_block_extractor = import_script("LSMG_stage1_xml_block_extractor.py", "stage1")
     LSMG_stage2_txt_to_json = import_script("LSMG_stage2_txt_to_json_2_test.py", "stage2")
     LSMG_stage3_chains_from_json = import_script("LSMG_stage3_chains_from_json.py", "stage3")
+    ng_blocks = import_script("nodesequence_tracer_pseudonode_cli.py", "ng_blocks")
     LSMG_stage4_forward_tracer = import_script("LSMG_stage4_forward_tracer.py", "stage4")
-    LSMG_stage5_merge_2and5_final_output = import_script("LSMG_stage5_merge_2and5_final_output_3.py", "stage5")
+    LSMG_stage5_merge_2and5_final_output = import_script("LSMG_stage5_merge_2and5_final_output_ngblocks_vers.py", "stage5")
+
 
     # Stage 1
     txt_out = make_temp_path("stage_1", base_name, use_named_tmp, temp_dir, ext=".txt")
@@ -64,7 +66,9 @@ def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_ou
 
     # Stage 4
     json4_out = make_temp_path("stage_4", base_name, use_named_tmp, temp_dir)
+    ng_blocks_out = make_temp_path("ng_blocks", base_name, use_named_tmp, temp_dir)
     if 4 in stages_to_run:
+        ng_blocks.run(json3_out, ng_blocks_out),
         LSMG_stage4_forward_tracer.run(json3_out, json4_out)
         print(f"{base_name} Stage Four completed.")
     else:
@@ -72,12 +76,12 @@ def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_ou
 
     # Stage 5 (with bundled reference files)
     blender_ref = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\blender_native_node_ref_2.json"
-    exported_groups = r"F:\Python_Scripts\Blender Scripts\frame_exported_nodegroups_4.json"
+    exported_groups = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\frame_exported_nodegroups_6.json"
     final_out = make_temp_path("stage_5", base_name, use_named_tmp, temp_dir)
 
     if 5 in stages_to_run:
         LSMG_stage5_merge_2and5_final_output.run(
-            json2_out, json4_out, blender_ref, exported_groups, final_out
+            json2_out, json4_out, blender_ref, exported_groups, ng_blocks_out, final_out
         )
         print(f"{base_name} Stage Five completed.")
     else:

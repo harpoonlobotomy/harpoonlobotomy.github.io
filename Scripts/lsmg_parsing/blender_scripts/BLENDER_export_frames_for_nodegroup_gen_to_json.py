@@ -1,3 +1,5 @@
+# F:\BG3 Extract PAKs\PAKs\Textures\Generated\Public\Shared\Assets\Textures\Procedural_Masks\Resources\
+
 ## Exports "nodegroups" in the form of frame-bounded node setups with links.
 ##-- Label reroute nodes as 'input_0/Name' - it will recognise the input_0 for linking, indexing, but use the /Name for the output file.
 ## Run script `F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\BLENDER_really_nodegroup_from_frame_json_file.py` to deploy nodegroups
@@ -128,7 +130,7 @@ def export_frame_groups_custom():
 
     frames = [n for n in nodes if n.type == 'FRAME']
     new_output = {}
-    output_path = r"F:\Python_Scripts\Blender Scripts\frame_exported_nodegroups_3.json"
+    output_path = r"F:\Python_Scripts\Blender Scripts\frame_exported_nodegroups_4.json"
 
 
     # Step 1: Get existing top-level frame keys

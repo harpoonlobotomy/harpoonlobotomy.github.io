@@ -1,3 +1,5 @@
+## Creates nodegroups from file in new blender material.
+
 import bpy
 import json
 

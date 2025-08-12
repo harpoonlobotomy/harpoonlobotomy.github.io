@@ -33,7 +33,7 @@ Also potentially works with other UE4-based material nodegraphs' XML-like docume
     with frame names as the node_type.
     See `Core_Script_Overview.md` for slightly more detail. )`
 
-# Stage 5: LSMG_stage5_merge_2and5_final_output_jsonvers.py
+# Stage 5: LSMG_stage5_merge_2and5_final_output_ngblocks_vers.py
     Input Example:
         `stage_2_tmp_CHAR_Fur.json`
         `stage_4_tmp_CHAR_Fur.json`
@@ -41,10 +41,13 @@ Also potentially works with other UE4-based material nodegraphs' XML-like docume
         `blender_exported_nodegroups_for_gen`
     Output Example: `stage_5_tmp_CHAR_Fur.json`
 	* Will also produce a _missing_nodes.json if any missing nodes are found.
+	*	Note: These files are input automatically by the wrapper, and do not need to be separately added. Any file locations/folders are provided at the Wrapper level.
+	*	Currently, only the LSMG file and the script are given as CLI commands.
 ---
 
 # Wrapper: LSMG_5Stage_Wrapper_jsonvers.py
 	Input example: CHAR_Fur.lsmg
+		* + native_node_ref and frame_exported_nodegroups
 	Output example: stage_5_tmp.json
 
 
@@ -137,6 +140,8 @@ Combine raw node metadata with discovered data types to produce a Blender-usable
   - Accurate data types at node and socket level
   - Identified Blender node classes or nodegroup substitutes
   - Connection structure ready for Blender import
+  - Also supports nodeblock replacement - for specific sequences where accurate nodebranch replication is impossible due to blender limitations (eg 4 channel vectors).
+		The node sequence generator will add flags to affected nodes, which will then be read by the template generator in Blender where they will be replaced by a custom nodegroup that accurately replicates the function.
 
 ---
 
@@ -176,6 +181,8 @@ Updated stages 1, 3 and 5 slightly to fix... something. I've genuinely forgotten
 Also added the current version of the nodesequence_tracer script - it finds (currently just one) specific pattern within a nodegraph (using the output from Stage3) and reports back;
 I'm amending the Blender Template Generator script to use this bulk-replacement so replicate 4-channel-specific portions of nodetrees. Currently, just the main VT_Layer pattern, but it's potentially expandable. 
 
+Also: Added new variants of the Stage 5 script and the Wrapper, and a CLI version of the node sequence tracer script that all work together, and add the relevant details of the nodegroup into the final output file. 
+
 The Blender templategen doesn't account for it yet, but it's in the works. Next few days, maybe. 
 
 I've worked on almost 500 scripts in 3 months now. I'm still rubbish at it, but I'm starting to be quicker at figuring out what's wrong and now and then, actually doing something good. I came at this backwards, starting with pretty intense stuff I couldn't even understand and now getting to grips with the basics. I really love it, actually. Didn't expect that.
@@ -192,3 +199,11 @@ Next up:
 > There was more, but I'm genuinely really tired. 
 
 - Harpoon.
+
+----
+
+12/8/25
+Updated everything, again. Nodegroup blocks are now completely integrated into the TempGen, though not yet integrated that into the MatGen.  TempGen is much better now. 
+Also added a nodegroup writer script, so you can provide nodegroup details and desired links in specific shorthand and it will generate the framed_nodegroups JSON output format, to avoid the 'frame' framework if desired. 
+
+- harpoon

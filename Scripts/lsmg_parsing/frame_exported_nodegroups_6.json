@@ -47,75 +47,26 @@
         ["NewGeometry", "Normal", "GroupOutput", "Output"]
     ]
   },
-  "VT_Layer_Nodegroup": {
+  "VT_Layers_4ch": {
       "color": "orange",
       "autohide": false,
       "sockets": {
         "inputs": {
-          "0": "A_Color",
-          "1": "B_Color_Subtract1",
-          "2": "Value_1",
-          "3": "B_Color_Subtract2",
-          "4": "Value_2",
-          "5": "B_Color_Subtract3",
-          "6": "Value_3",
-          "7": "B_Color_Subtract4",
-          "8": "Value_4"
+          "0": "ComponentMaskNode_XYZ[1]/Value",
+          "1": "LengthNode[1]/Value",
+          "2": "ComponentMaskNode_XYZ[2]/Value",
+          "3": "LengthNode[2]/Value",
+          "4": "ComponentMaskNode_XYZ[3]/Value",
+          "5": "LengthNode[3]/Value",
+          "6": "ComponentMaskNode_XYZ[4]/Value",
+          "7": "LengthNode[4]/Value"
       },
         "outputs": {
-          "0": "Vector",
-          "1": "Vector_2"
+          "0": "AddNode[1]/Result",
+          "1": "AddNode[2]/Result"
       }
     },
       "nodes": [
-        {
-          "name": "Mix",
-          "type": "ShaderNodeMix",
-          "location": [-5590, 1220],
-          "blend_type": "SUBTRACT",
-          "data_type": "RGBA",
-          "default_values": {
-            "Factor_Float": 1.0,
-            "Factor_Vector": [1, 1, 1],
-            "A_Float": 0.0,
-            "A_Vector": [0, 0, 0],
-            "B_Vector": [0, 0, 0],
-            "A_Rotation": [0, 0, 0],
-            "B_Rotation": [0, 0, 0]
-        }
-      },
-        {
-          "name": "Mix.001",
-          "type": "ShaderNodeMix",
-          "location": [-5530, 920],
-          "blend_type": "SUBTRACT",
-          "data_type": "RGBA",
-          "default_values": {
-            "Factor_Float": 1.0,
-            "Factor_Vector": [1, 1, 1],
-            "A_Float": 0.0,
-            "A_Vector": [0, 0, 0],
-            "B_Vector": [0, 0, 0],
-            "A_Rotation": [0, 0, 0],
-            "B_Rotation": [0, 0, 0]
-        }
-      },
-        {
-          "name": "Mix.002",
-          "type": "ShaderNodeMix",
-          "location": [-5600, 550],
-          "blend_type": "SUBTRACT",
-          "data_type": "RGBA",
-          "default_values": {
-            "Factor_Float": 1.0,
-            "Factor_Vector": [1, 1, 1],
-            "A_Float": 0.0,
-            "A_Vector": [0, 0, 0],
-            "B_Vector": [0, 0, 0],
-            "A_Rotation": [0, 0, 0],
-            "B_Rotation": [0, 0, 0]
-        }
-      },
         {
           "name": "VectorMath",
           "type": "ShaderNodeVectorMath",
@@ -147,22 +98,6 @@
         }
       },
         {
-          "name": "Mix.003",
-          "type": "ShaderNodeMix",
-          "location": [-5610, 1500],
-          "blend_type": "SUBTRACT",
-          "data_type": "RGBA",
-          "default_values": {
-            "Factor_Float": 1.0,
-            "Factor_Vector": [1, 1, 1],
-            "A_Float": 0.0,
-            "A_Vector": [0, 0, 0],
-            "B_Vector": [0, 0, 0],
-            "A_Rotation": [0, 0, 0],
-            "B_Rotation": [0, 0, 0]
-        }
-      },
-        {
           "name": "CombineXYZ",
           "type": "ShaderNodeCombineXYZ",
           "location": [-5100, 1200]
@@ -170,17 +105,16 @@
         {
           "name": "Value",
           "type": "ShaderNodeValue",
-          "location": [-5120, 1040]
+          "location": [-5120, 1040],
+          "default_values": {
+            "Value": 3.0
+        }
       },
         {
           "name": "Math",
           "type": "ShaderNodeMath",
           "location": [-4940, 1040],
-          "operation": "SQRT",
-          "default_values": {
-            "Value_001": 0.5,
-            "Value_002": 0.5
-        }
+          "operation": "SQRT"
       },
         {
           "name": "VectorMath.003",
@@ -195,7 +129,10 @@
         {
           "name": "Value.001",
           "type": "ShaderNodeValue",
-          "location": [-4760, 1000]
+          "location": [-4760, 1000],
+          "default_values": {
+            "Value": 0.25
+        }
       },
         {
           "name": "VectorMath.004",
@@ -246,26 +183,6 @@
             "Vector_002": [0, 0, 0],
             "Scale": 1.0
         }
-      },
-        {
-          "name": "Value.002",
-          "type": "ShaderNodeValue",
-          "location": [-5070, 660]
-      },
-        {
-          "name": "Math.001",
-          "type": "ShaderNodeMath",
-          "location": [-4890, 660],
-          "operation": "SQRT",
-          "default_values": {
-            "Value_001": 0.5,
-            "Value_002": 0.5
-        }
-      },
-        {
-          "name": "Value.003",
-          "type": "ShaderNodeValue",
-          "location": [-4700, 490]
       },
         {
           "name": "VectorMath.009",
@@ -353,8 +270,7 @@
           "location": [-4540, 680],
           "operation": "SUBTRACT",
           "default_values": {
-            "Value": 1.0,
-            "Value_002": 0.5
+            "Value": 1.0
         }
       },
         {
@@ -447,31 +363,22 @@
         ["CombineXYZ", "Vector", "VectorMath.003", "Vector"],
         ["Value", "Value", "Math", "Value"],
         ["Math", "Value", "VectorMath.003", "Vector_001"],
-        ["Value.001", "Value", "VectorMath.005", "Vector_001"],
+        ["Math", "Value", "Math.004", "Value_001"],
         ["VectorMath.006", "Vector", "VectorMath.008", "Vector_001"],
         ["VectorMath.007", "Vector", "VectorMath.008", "Vector"],
-        ["Value.002", "Value", "Math.001", "Value"],
-        ["GroupInput", "A_Color", "Mix.003", "A_Color"],
-        ["GroupInput", "B_Color_Subtract1", "Mix.003", "B_Color"],
-        ["GroupInput", "B_Color_Subtract2", "Mix", "B_Color"],
-        ["GroupInput", "A_Color", "Mix", "A_Color"],
-        ["GroupInput", "A_Color", "Mix.001", "A_Color"],
-        ["GroupInput", "B_Color_Subtract3", "Mix.001", "B_Color"],
-        ["GroupInput", "A_Color", "Mix.002", "A_Color"],
-        ["GroupInput", "B_Color_Subtract4", "Mix.002", "B_Color"],
-        ["VectorMath.008", "Vector", "GroupOutput", "Vector"],
-        ["VectorMath.002", "Vector", "GroupOutput", "Vector_2"],
-        ["Mix", "Result_Color", "VectorMath.009", "Vector"],
+        ["GroupInput", "LengthNode[1]/Value", "VectorMath.012", "Vector"],
+        ["GroupInput", "LengthNode[2]/Value", "VectorMath.009", "Vector"],
+        ["GroupInput", "LengthNode[3]/Value", "VectorMath.010", "Vector"],
+        ["GroupInput", "LengthNode[4]/Value", "VectorMath.011", "Vector"],
+        ["VectorMath.008", "Vector", "GroupOutput", "AddNode[1]/Result"],
+        ["VectorMath.002", "Vector", "GroupOutput", "AddNode[2]/Result"],
         ["VectorMath.009", "Value", "CombineXYZ", "Y"],
-        ["Mix.001", "Result_Color", "VectorMath.010", "Vector"],
         ["VectorMath.010", "Value", "CombineXYZ", "Z"],
-        ["Mix.002", "Result_Color", "VectorMath.011", "Vector"],
-        ["GroupInput", "Value_3", "VectorMath", "Vector_001"],
-        ["GroupInput", "Value_4", "VectorMath.001", "Vector_001"],
-        ["Mix.003", "Result_Color", "VectorMath.012", "Vector"],
         ["VectorMath.012", "Value", "CombineXYZ", "X"],
-        ["GroupInput", "Value_2", "VectorMath.006", "Vector_001"],
-        ["GroupInput", "Value_1", "VectorMath.007", "Vector_001"],
+        ["GroupInput", "ComponentMaskNode_XYZ[3]/Value", "VectorMath", "Vector_001"],
+        ["GroupInput", "ComponentMaskNode_XYZ[4]/Value", "VectorMath.001", "Vector_001"],
+        ["GroupInput", "ComponentMaskNode_XYZ[2]/Value", "VectorMath.006", "Vector_001"],
+        ["GroupInput", "ComponentMaskNode_XYZ[1]/Value", "VectorMath.007", "Vector_001"],
         ["VectorMath.005", "Vector", "SeparateXYZ", "Vector"],
         ["SeparateXYZ", "Z", "VectorMath", "Vector"],
         ["VectorMath.003", "Vector", "VectorMath.013", "Vector_001"],
@@ -482,7 +389,7 @@
         ["SeparateXYZ.001", "Y", "VectorMath.006", "Vector"],
         ["VectorMath.005", "Vector", "SeparateXYZ.002", "Vector"],
         ["SeparateXYZ.002", "X", "VectorMath.007", "Vector"],
-        ["Value.003", "Value", "Math.003", "Value_001"],
+        ["Value.001", "Value", "Math.003", "Value_001"],
         ["SeparateXYZ.003", "X", "Clamp", "Value"],
         ["SeparateXYZ.003", "Y", "Clamp.001", "Value"],
         ["SeparateXYZ.003", "Z", "Clamp.002", "Value"],
@@ -493,13 +400,13 @@
         ["CombineXYZ.001", "Vector", "VectorMath.005", "Vector"],
         ["Math.004", "Value", "Math.005", "Value_001"],
         ["VectorMath.011", "Value", "Math.004", "Value"],
-        ["Math.001", "Value", "Math.004", "Value_001"],
         ["Math.005", "Value", "Math.006", "Value_001"],
         ["Math.003", "Value", "Math.006", "Value"],
         ["Math.006", "Value", "Clamp.003", "Value"],
         ["Clamp.003", "Result", "Math.007", "Value"],
-        ["Value.003", "Value", "Math.007", "Value_001"],
-        ["Math.007", "Value", "VectorMath.001", "Vector"]
+        ["Value.001", "Value", "Math.007", "Value_001"],
+        ["Math.007", "Value", "VectorMath.001", "Vector"],
+        ["Value.001", "Value", "VectorMath.005", "Vector_001"]
     ]
   },
   "Invert_G_normals": {
@@ -548,59 +455,6 @@
         ["Invert", "Color", "CombineColor", "Green"],
         ["SeparateColor", "Green", "Invert", "Color"],
         ["GroupInput", "Color", "SeparateColor", "Color"],
-        ["NormalMap", "Normal", "GroupOutput", "Normal"]
-    ]
-  },
-  "VT_normals": {
-      "color": "purple",
-      "autohide": true,
-      "sockets": {
-        "inputs": {
-          "0": "Color",
-          "1": "Alpha"
-      },
-        "outputs": {
-          "0": "Normal"
-      }
-    },
-      "nodes": [
-        {
-          "name": "SeparateColor",
-          "type": "ShaderNodeSeparateColor",
-          "location": [130, 130]
-      },
-        {
-          "name": "CombineColor",
-          "type": "ShaderNodeCombineColor",
-          "location": [500, 260]
-      },
-        {
-          "name": "NormalMap",
-          "type": "ShaderNodeNormalMap",
-          "location": [660, 260],
-          "default_values": {
-            "Strength": 1.0
-        }
-      },
-        {
-          "name": "Invert",
-          "type": "ShaderNodeInvert",
-          "location": [300, 160],
-          "default_values": {
-            "Fac": 1.0
-        }
-      }
-    ],
-      "links": [
-        ["CombineColor", "Color", "NormalMap", "Color"],
-        ["Reroute.007", "Output", "CombineColor", "Green"],
-        ["SeparateColor", "Green", "Invert", "Color"],
-        ["Reroute.006", "Output", "CombineColor", "Blue"],
-        ["SeparateColor", "Blue", "Reroute.005", "Input"],
-        ["Reroute.005", "Output", "Reroute.006", "Input"],
-        ["Invert", "Color", "Reroute.007", "Input"],
-        ["GroupInput", "Color", "SeparateColor", "Color"],
-        ["GroupInput", "Alpha", "CombineColor", "Red"],
         ["NormalMap", "Normal", "GroupOutput", "Normal"]
     ]
   },
@@ -1213,7 +1067,7 @@
     ]
   },
   "ComponentMaskNode_X": {
-      "color": "math",
+      "color": "blue",
       "autohide": true,
       "sockets": {
         "inputs": {
@@ -1234,6 +1088,29 @@
         ["GroupInput", "Value", "SeparateXYZ", "Vector"],
         ["SeparateXYZ", "X", "GroupOutput", "Result"]
     ]
+    },
+    "ComponentMaskNode_Z": {
+        "color": "blue",
+        "autohide": true,
+        "sockets": {
+          "inputs": {
+            "0": "Value"
+        },
+          "outputs": {
+            "0": "Result"
+        }
+      },
+        "nodes": [
+          {
+            "name": "SeparateXYZ",
+            "type": "ShaderNodeSeparateXYZ",
+            "location": [-1190, 4230]
+        }
+      ],
+        "links": [
+          ["GroupInput", "Value", "SeparateXYZ", "Vector"],
+          ["SeparateXYZ", "Y", "GroupOutput", "Result"]
+      ]
   },
   "ComponentMaskNode_XY_vector": {
       "color": "purple",
@@ -1689,39 +1566,8 @@
         ["SeparateXYZ", "Y", "CombineXYZ", "Y"]
     ]
   },
-  "ComponentMaskNode_XYZ_color_2": {
-      "color": "purple",
-      "autohide": true,
-      "sockets": {
-        "inputs": {
-          "0": "Value"
-      },
-        "outputs": {
-          "0": "Result"
-      }
-    },
-      "nodes": [
-        {
-          "name": "SeparateXYZ",
-          "type": "ShaderNodeSeparateXYZ",
-          "location": [-1190, 4230]
-      },
-        {
-          "name": "CombineXYZ",
-          "type": "ShaderNodeCombineXYZ",
-          "location": [-1030, 4230]
-      }
-    ],
-      "links": [
-        ["GroupInput", "Value", "SeparateXYZ", "Vector"],
-        ["SeparateXYZ", "X", "CombineXYZ", "X"],
-        ["CombineXYZ", "Vector", "GroupOutput", "Result"],
-        ["SeparateXYZ", "Z", "CombineXYZ", "Z"],
-        ["SeparateXYZ", "Y", "CombineXYZ", "Y"]
-    ]
-  },
   "ComponentMaskNode_XYZ_color": {
-      "color": "",
+      "color": "yellow",
       "autohide": true,
       "sockets": {
         "inputs": {
@@ -1749,6 +1595,638 @@
         ["SeparateColor", "Green", "CombineColor", "Green"],
         ["SeparateColor", "Blue", "CombineColor", "Blue"],
         ["CombineColor", "Color", "GroupOutput", "Result"]
+    ]
+  },
+  "HardEdgeTriPlanarUVNode_vector": {
+      "color": "purple",
+      "autohide": false,
+      "sockets": {
+        "inputs": {
+          "0": "Tiling",
+          "1": "LocalOffset",
+          "2": "EdgeDistortionMap",
+          "3": "EdgeDistortionAmount",
+          "4": "LocalNormal",
+          "5": "LocalPosition"
+      },
+        "outputs": {
+          "0": "UV",
+          "1": "Mask"
+      }
+    },
+      "nodes": [
+        {
+          "name": "VectorMath",
+          "type": "ShaderNodeVectorMath",
+          "location": [-680, 660],
+          "operation": "ABSOLUTE",
+          "default_values": {
+            "Vector_001": [0, 0, 0],
+            "Vector_002": [0, 0, 0],
+            "Scale": 1.0
+        }
+      },
+        {
+          "name": "SeparateXYZ",
+          "type": "ShaderNodeSeparateXYZ",
+          "location": [-520, 660]
+      },
+        {
+          "name": "Math",
+          "type": "ShaderNodeMath",
+          "location": [-300, 850],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.001",
+          "type": "ShaderNodeMath",
+          "location": [-290, 690],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.002",
+          "type": "ShaderNodeMath",
+          "location": [-80, 710],
+          "operation": "MULTIPLY",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.003",
+          "type": "ShaderNodeMath",
+          "location": [-310, 520],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.004",
+          "type": "ShaderNodeMath",
+          "location": [-300, 350],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.005",
+          "type": "ShaderNodeMath",
+          "location": [-60, 430],
+          "operation": "MULTIPLY",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.006",
+          "type": "ShaderNodeMath",
+          "location": [130, 210],
+          "operation": "LESS_THAN",
+          "default_values": {
+            "Value": 0.5,
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.007",
+          "type": "ShaderNodeMath",
+          "location": [130, 40],
+          "operation": "LESS_THAN",
+          "default_values": {
+            "Value": 0.5,
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.008",
+          "type": "ShaderNodeMath",
+          "location": [330, 90],
+          "operation": "MULTIPLY",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "SeparateXYZ.001",
+          "type": "ShaderNodeSeparateXYZ",
+          "location": [-270, -90]
+      },
+        {
+          "name": "CombineXYZ",
+          "type": "ShaderNodeCombineXYZ",
+          "location": [340, 880],
+          "default_values": {
+            "X": 0.0
+        }
+      },
+        {
+          "name": "CombineXYZ.001",
+          "type": "ShaderNodeCombineXYZ",
+          "location": [330, 270],
+          "default_values": {
+            "Z": 0.0
+        }
+      },
+        {
+          "name": "CombineXYZ.002",
+          "type": "ShaderNodeCombineXYZ",
+          "location": [340, -100],
+          "default_values": {
+            "Y": 0.0
+        }
+      },
+        {
+          "name": "VectorMath.001",
+          "type": "ShaderNodeVectorMath",
+          "location": [530, 840],
+          "operation": "ADD",
+          "default_values": {
+            "Vector_002": [0, 0, 0],
+            "Scale": 1.0
+        }
+      },
+        {
+          "name": "VectorMath.002",
+          "type": "ShaderNodeVectorMath",
+          "location": [530, 440],
+          "operation": "ADD",
+          "default_values": {
+            "Vector_002": [0, 0, 0],
+            "Scale": 1.0
+        }
+      },
+        {
+          "name": "VectorMath.003",
+          "type": "ShaderNodeVectorMath",
+          "location": [530, -60],
+          "operation": "ADD",
+          "default_values": {
+            "Vector_002": [0, 0, 0],
+            "Scale": 1.0
+        }
+      },
+        {
+          "name": "VectorMath.004",
+          "type": "ShaderNodeVectorMath",
+          "location": [730, 840],
+          "operation": "SCALE",
+          "default_values": {
+            "Vector_001": [0, 0, 0],
+            "Vector_002": [0, 0, 0]
+        }
+      },
+        {
+          "name": "VectorMath.005",
+          "type": "ShaderNodeVectorMath",
+          "location": [730, 440],
+          "operation": "SCALE",
+          "default_values": {
+            "Vector_001": [0, 0, 0],
+            "Vector_002": [0, 0, 0]
+        }
+      },
+        {
+          "name": "VectorMath.006",
+          "type": "ShaderNodeVectorMath",
+          "location": [730, -60],
+          "operation": "SCALE",
+          "default_values": {
+            "Vector_001": [0, 0, 0],
+            "Vector_002": [0, 0, 0]
+        }
+      },
+        {
+          "name": "Mix",
+          "type": "ShaderNodeMix",
+          "location": [1030, 640],
+          "blend_type": "MIX",
+          "data_type": "VECTOR",
+          "default_values": {
+            "A_Float": 0.0,
+            "B_Float": 0.0,
+            "A_Color": [0, 0, 0, 1],
+            "B_Color": [0, 0, 0, 1],
+            "A_Rotation": [0, 0, 0],
+            "B_Rotation": [0, 0, 0]
+        }
+      },
+        {
+          "name": "Mix.001",
+          "type": "ShaderNodeMix",
+          "location": [1230, 640],
+          "blend_type": "MIX",
+          "data_type": "VECTOR",
+          "default_values": {
+            "A_Float": 0.0,
+            "B_Float": 0.0,
+            "A_Color": [0, 0, 0, 1],
+            "B_Color": [0, 0, 0, 1],
+            "A_Rotation": [0, 0, 0],
+            "B_Rotation": [0, 0, 0]
+        }
+      },
+        {
+          "name": "CombineXYZ.003",
+          "type": "ShaderNodeCombineXYZ",
+          "location": [1230, 240]
+      }
+    ],
+      "links": [
+        ["VectorMath", "Vector", "SeparateXYZ", "Vector"],
+        ["SeparateXYZ", "X", "Math", "Value"],
+        ["SeparateXYZ", "Y", "Math", "Value_001"],
+        ["SeparateXYZ", "X", "Math.001", "Value"],
+        ["SeparateXYZ", "Z", "Math.001", "Value_001"],
+        ["Math", "Value", "Math.002", "Value"],
+        ["Math.001", "Value", "Math.002", "Value_001"],
+        ["SeparateXYZ", "Y", "Math.003", "Value"],
+        ["SeparateXYZ", "Z", "Math.003", "Value_001"],
+        ["SeparateXYZ", "Y", "Math.004", "Value"],
+        ["SeparateXYZ", "X", "Math.004", "Value_001"],
+        ["Math.003", "Value", "Math.005", "Value"],
+        ["Math.004", "Value", "Math.005", "Value_001"],
+        ["Math.002", "Value", "Math.006", "Value_001"],
+        ["Math.005", "Value", "Math.007", "Value_001"],
+        ["Math.006", "Value", "Math.008", "Value"],
+        ["Math.007", "Value", "Math.008", "Value_001"],
+        ["SeparateXYZ.001", "X", "CombineXYZ.002", "X"],
+        ["SeparateXYZ.001", "X", "CombineXYZ.001", "X"],
+        ["SeparateXYZ.001", "Y", "CombineXYZ.001", "Y"],
+        ["CombineXYZ", "Vector", "VectorMath.001", "Vector"],
+        ["CombineXYZ.002", "Vector", "VectorMath.002", "Vector"],
+        ["CombineXYZ.001", "Vector", "VectorMath.003", "Vector"],
+        ["VectorMath.001", "Vector", "VectorMath.004", "Vector"],
+        ["VectorMath.002", "Vector", "VectorMath.005", "Vector"],
+        ["VectorMath.003", "Vector", "VectorMath.006", "Vector"],
+        ["VectorMath.004", "Vector", "Mix", "A_Vector"],
+        ["VectorMath.005", "Vector", "Mix", "B_Vector"],
+        ["Math.002", "Value", "Mix", "Factor_Vector"],
+        ["VectorMath.006", "Vector", "Mix.001", "B_Vector"],
+        ["Math.005", "Value", "Mix.001", "Factor_Vector"],
+        ["Math.002", "Value", "CombineXYZ.003", "X"],
+        ["Math.005", "Value", "CombineXYZ.003", "Y"],
+        ["Math.008", "Value", "CombineXYZ.003", "Z"],
+        ["Mix", "Result_Vector", "Mix.001", "A_Vector"],
+        ["Math.002", "Value", "Mix", "Factor_Float"],
+        ["Math.005", "Value", "Mix.001", "Factor_Float"],
+        ["SeparateXYZ.001", "Z", "CombineXYZ.002", "Z"],
+        ["SeparateXYZ.001", "Z", "CombineXYZ", "Z"],
+        ["SeparateXYZ.001", "Y", "CombineXYZ", "Y"],
+        ["GroupInput", "LocalNormal", "VectorMath", "Vector"],
+        ["GroupInput", "LocalPosition", "SeparateXYZ.001", "Vector"],
+        ["GroupInput", "LocalOffset", "VectorMath.001", "Vector_001"],
+        ["GroupInput", "LocalOffset", "VectorMath.002", "Vector_001"],
+        ["GroupInput", "LocalOffset", "VectorMath.003", "Vector_001"],
+        ["GroupInput", "Tiling", "VectorMath.004", "Scale"],
+        ["GroupInput", "Tiling", "VectorMath.005", "Scale"],
+        ["GroupInput", "Tiling", "VectorMath.006", "Scale"],
+        ["Mix.001", "Result_Vector", "GroupOutput", "UV"],
+        ["CombineXYZ.003", "Vector", "GroupOutput", "Mask"]
+    ]
+  },
+  "StepNode_vector": {
+      "color": "purple",
+      "autohide": false,
+      "sockets": {
+        "inputs": {
+          "0": "X",
+          "1": "Y"
+      },
+        "outputs": {
+          "0": "Result"
+      }
+    },
+      "nodes": [
+        {
+          "name": "Math",
+          "type": "ShaderNodeMath",
+          "location": [1490, 2950],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "SeparateXYZ",
+          "type": "ShaderNodeSeparateXYZ",
+          "location": [1280, 3060]
+      },
+        {
+          "name": "Math.001",
+          "type": "ShaderNodeMath",
+          "location": [1490, 3140],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "Math.002",
+          "type": "ShaderNodeMath",
+          "location": [1490, 2770],
+          "operation": "GREATER_THAN",
+          "default_values": {
+            "Value_002": 0.5
+        }
+      },
+        {
+          "name": "SeparateXYZ.001",
+          "type": "ShaderNodeSeparateXYZ",
+          "location": [1270, 2800]
+      },
+        {
+          "name": "CombineXYZ",
+          "type": "ShaderNodeCombineXYZ",
+          "location": [1720, 2960]
+      }
+    ],
+      "links": [
+        ["SeparateXYZ", "X", "Math.001", "Value_001"],
+        ["SeparateXYZ", "Y", "Math", "Value_001"],
+        ["SeparateXYZ", "Z", "Math.002", "Value_001"],
+        ["SeparateXYZ.001", "X", "Math.001", "Value"],
+        ["SeparateXYZ.001", "Y", "Math", "Value"],
+        ["SeparateXYZ.001", "Z", "Math.002", "Value"],
+        ["Math.001", "Value", "CombineXYZ", "X"],
+        ["Math", "Value", "CombineXYZ", "Y"],
+        ["Math.002", "Value", "CombineXYZ", "Z"],
+        ["GroupInput", "X", "SeparateXYZ", "Vector"],
+        ["GroupInput", "Y", "SeparateXYZ.001", "Vector"],
+        ["CombineXYZ", "Vector", "GroupOutput", "Result"]
+    ]
+  },
+  "VirtualTextureNode": {
+      "color": "orange",
+      "autohide": false,
+      "sockets": {
+        "inputs": {
+          "0": "UV"
+      },
+        "outputs": {
+          "0": "Albedo",
+          "1": "Normal",
+          "2": "Physical",
+          "3": "Metal Mask",
+          "4": "Roughness",
+          "5": "Occlusion",
+          "6": "Physical Alpha"
+      }
+    },
+      "nodes": [
+        {
+          "name": "SeparateColor",
+          "type": "ShaderNodeSeparateColor",
+          "location": [1450, 1840]
+      },
+        {
+          "name": "TexImage",
+          "type": "ShaderNodeTexImage",
+          "location": [830, 2370],
+          "label": "Albedo",
+          "default_values": {
+            "Vector": [0, 0, 0]
+        }
+      },
+        {
+          "name": "TexImage.001",
+          "type": "ShaderNodeTexImage",
+          "location": [830, 2070],
+          "label": "Normal",
+          "default_values": {
+            "Vector": [0, 0, 0]
+        }
+      },
+        {
+          "name": "TexImage.002",
+          "type": "ShaderNodeTexImage",
+          "label": "Physical",
+          "location": [830, 1770],
+          "default_values": {
+            "Vector": [0, 0, 0]
+        }
+      },
+        {
+          "name": "Mapping",
+          "type": "ShaderNodeMapping",
+          "location": [590, 2120],
+          "default_values": {
+            "Location": [0, 0, 0],
+            "Rotation": [0, 0, 0],
+            "Scale": [1, 1, 1]
+        }
+      },
+        {
+          "name": "TexCoord",
+          "type": "ShaderNodeTexCoord",
+          "location": [590, 2390]
+      },
+        {
+          "name": "SeparateColor.001",
+          "type": "ShaderNodeSeparateColor",
+          "location": [1220, 1990]
+      },
+        {
+          "name": "CombineColor",
+          "type": "ShaderNodeCombineColor",
+          "location": [1620, 2120]
+      },
+        {
+          "name": "NormalMap",
+          "type": "ShaderNodeNormalMap",
+          "location": [1780, 2120],
+          "default_values": {
+            "Strength": 1.0
+        }
+      },
+        {
+          "name": "Invert",
+          "type": "ShaderNodeInvert",
+          "location": [1420, 2040],
+          "default_values": {
+            "Fac": 1.0
+        }
+      }
+    ],
+      "links": [
+        ["TexImage.002", "Color", "SeparateColor", "Color"],
+        ["GroupInput", "UV", "Mapping", "Vector"],
+        ["TexImage", "Color", "GroupOutput", "Albedo"],
+        ["SeparateColor", "Green", "GroupOutput", "Roughness"],
+        ["SeparateColor", "Blue", "GroupOutput", "Occlusion"],
+        ["SeparateColor", "Red", "GroupOutput", "Metal Mask"],
+        ["CombineColor", "Color", "NormalMap", "Color"],
+        ["SeparateColor.001", "Green", "Invert", "Color"],
+        ["TexImage.001", "Color", "SeparateColor.001", "Color"],
+        ["TexImage.001", "Alpha", "CombineColor", "Red"],
+        ["NormalMap", "Normal", "GroupOutput", "Normal"],
+        ["Invert", "Color", "CombineColor", "Green"],
+        ["SeparateColor.001", "Blue", "CombineColor", "Blue"],
+        ["TexImage.002", "Color", "GroupOutput", "Physical"],
+        ["TexImage.002", "Alpha", "GroupOutput", "Physical Alpha"]
+    ]
+  },
+  "VirtualTextureNode_vector": {
+      "color": "orange",
+      "autohide": false,
+      "sockets": {
+        "inputs": {
+          "0": "UV"
+      },
+        "outputs": {
+          "0": "Albedo",
+          "1": "Normal",
+          "2": "Physical",
+          "3": "Metal Mask",
+          "4": "Roughness",
+          "5": "Occlusion"
+      }
+    },
+      "nodes": [
+        {
+          "name": "SeparateColor",
+          "type": "ShaderNodeSeparateColor",
+          "location": [1450, 1840]
+      },
+        {
+          "name": "TexImage",
+          "type": "ShaderNodeTexImage",
+          "location": [830, 2370],
+          "default_values": {
+            "Vector": [0, 0, 0]
+        }
+      },
+        {
+          "name": "TexImage.001",
+          "type": "ShaderNodeTexImage",
+          "location": [830, 2070],
+          "default_values": {
+            "Vector": [0, 0, 0]
+        }
+      },
+        {
+          "name": "TexImage.002",
+          "type": "ShaderNodeTexImage",
+          "location": [830, 1770],
+          "default_values": {
+            "Vector": [0, 0, 0]
+        }
+      },
+        {
+          "name": "Mapping",
+          "type": "ShaderNodeMapping",
+          "location": [590, 2120],
+          "default_values": {
+            "Location": [0, 0, 0],
+            "Rotation": [0, 0, 0],
+            "Scale": [1, 1, 1]
+        }
+      },
+        {
+          "name": "TexCoord",
+          "type": "ShaderNodeTexCoord",
+          "location": [590, 2390]
+      },
+        {
+          "name": "SeparateColor.001",
+          "type": "ShaderNodeSeparateColor",
+          "location": [1220, 1990]
+      },
+        {
+          "name": "CombineColor",
+          "type": "ShaderNodeCombineColor",
+          "location": [1620, 2120]
+      },
+        {
+          "name": "NormalMap",
+          "type": "ShaderNodeNormalMap",
+          "location": [1780, 2120],
+          "default_values": {
+            "Strength": 1.0
+        }
+      },
+        {
+          "name": "Invert",
+          "type": "ShaderNodeInvert",
+          "location": [1420, 2040],
+          "default_values": {
+            "Fac": 1.0
+        }
+      }
+    ],
+      "links": [
+        ["TexImage.002", "Color", "SeparateColor", "Color"],
+        ["GroupInput", "UV", "Mapping", "Vector"],
+        ["TexImage", "Color", "GroupOutput", "Albedo"],
+        ["SeparateColor", "Green", "GroupOutput", "Roughness"],
+        ["SeparateColor", "Blue", "GroupOutput", "Occlusion"],
+        ["SeparateColor", "Red", "GroupOutput", "Metal Mask"],
+        ["CombineColor", "Color", "NormalMap", "Color"],
+        ["SeparateColor.001", "Green", "Invert", "Color"],
+        ["TexImage.001", "Color", "SeparateColor.001", "Color"],
+        ["TexImage.001", "Alpha", "CombineColor", "Red"],
+        ["NormalMap", "Normal", "GroupOutput", "Normal"],
+        ["Invert", "Color", "CombineColor", "Green"],
+        ["SeparateColor.001", "Blue", "CombineColor", "Blue"],
+        ["TexImage.002", "Color", "GroupOutput", "Physical"]
+    ]
+  },
+
+  "VT_normals": {
+      "color": "purple",
+      "autohide": false,
+      "sockets": {
+        "inputs": {
+          "0": "Color",
+          "1": "Alpha"
+      },
+        "outputs": {
+          "0": "Normal"
+      }
+    },
+      "nodes": [
+        {
+          "name": "SeparateColor",
+          "type": "ShaderNodeSeparateColor",
+          "location": [-310, -60]
+      },
+        {
+          "name": "CombineColor",
+          "type": "ShaderNodeCombineColor",
+          "location": [100, 60]
+      },
+        {
+          "name": "NormalMap",
+          "type": "ShaderNodeNormalMap",
+          "location": [260, 60],
+          "default_values": {
+            "Strength": 1.0
+        }
+      },
+        {
+          "name": "Invert",
+          "type": "ShaderNodeInvert",
+          "location": [-120, -10],
+          "default_values": {
+            "Fac": 1.0
+        }
+      }
+    ],
+      "links": [
+        ["CombineColor", "Color", "NormalMap", "Color"],
+        ["SeparateColor", "Green", "Invert", "Color"],
+        ["GroupInput", "Color", "SeparateColor", "Color"],
+        ["GroupInput", "Alpha", "CombineColor", "Red"],
+        ["Invert", "Color", "CombineColor", "Green"],
+        ["SeparateColor", "Blue", "CombineColor", "Blue"],
+        ["NormalMap", "Normal", "GroupOutput", "Normal"]
     ]
   }
 }

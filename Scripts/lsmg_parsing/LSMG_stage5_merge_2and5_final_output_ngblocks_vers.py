@@ -1,3 +1,5 @@
+## !!!!!  The socket orders are wrong sometimes now, when they weren't before. Need to investigate before I do much else.
+#C:\Users\Gabriel>python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_Skin_Body.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output" --start-at 1
 import json
 from collections import OrderedDict
 import os
@@ -20,20 +22,29 @@ SOCKET_MAP = {
         "X": {"identifier": "A_Float", "index": 2},
         "Y": {"identifier": "B_Float", "index": 3},
         "Result": {"identifier": "Result_Float", "index": 0}
+    },
+    "FLOAT": {
+        "Alpha": {"identifier": "Factor_Float", "index": 0},
+        "X": {"identifier": "A_Float", "index": 2},
+        "Y": {"identifier": "B_Float", "index": 3},
+        "Result": {"identifier": "Result_Float", "index": 0}
     }
+
 }
 
-def load_json_files(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path):
+def load_json_files(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, ng_blocks_path):
     with open(first_data_path, "r", encoding="utf-8") as f1, \
          open(second_data_path, "r", encoding="utf-8") as f2, \
          open(blender_native_nodes_path, "r", encoding="utf-8") as f3, \
-         open(nodegroups_defs_path, "r", encoding="utf-8-sig") as f4:
+         open(nodegroups_defs_path, "r", encoding="utf-8-sig") as f4, \
+         open(ng_blocks_path, "r", encoding="utf-8-sig") as f5:
         first_data = json.load(f1)
         second_data = json.load(f2)
         blender_native_nodes = json.load(f3)
         nodegroups_defs = json.load(f4)
+        ng_blocks = json.load(f5)
 
-    return first_data, second_data, blender_native_nodes, nodegroups_defs
+    return first_data, second_data, blender_native_nodes, nodegroups_defs, ng_blocks
 
 def extract_type(full_type):
     return full_type.split(" /")[0].strip()
@@ -77,7 +88,12 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
             continue
 
         node["Blender_type"] = blender_node.get("type")
-
+## # NOTE: 
+# replace with something like this: 11/8/25
+#            for key in optional_keys:
+#                if key in node_attrs:
+#                    int_node[key] = node_attrs[key]
+##
         if "blend_type" in blender_node:
             node["Blend_Type"] = blender_node.get("blend_type")
             node["Data_Type"] = blender_node.get("data_type")
@@ -133,11 +149,35 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
                                 #print(f"[Set Factor] Node '{node.get('ID', '?')}' (type: {node.get('Type', '?')}) – defaulted 'Factor' to 1.0")
                         break
 
+####---- add ng blocks support -------
+
+def add_ng_block_data(first_data, ng_blocks):
+
+    for node_id, node in first_data["Nodes"].items():
+        if not node_id:
+            continue
+
+        for group_id, group_data in ng_blocks["ng_nodes"].items():
+            for state in ["start", "end", "contained"]:
+                nodes_dict = group_data.get(state, {})
+                if node_id in nodes_dict:
+                    #print(f"NodeGroup Block ID: {group_id} // State: {state}")
+                    node["ng_block"] = group_id
+                    node["ng_block_role"] = nodes_dict[node_id]
+                    node["ng_block_state"] = state
+            else:
+                continue  # only runs if inner loop did NOT break
+            break  # stop searching other groups if matched
+
 def reorder_node_fields(node):
     desired_order = [
         "Node_Id",
         "Node_Name",
         "Node_Type",
+        "Is_Pattern",
+        "ng_block",
+        "ng_block_role",
+        "ng_block_state",
         "Blender_type",
         "Data_Type",
         "Blend_Type",
@@ -182,27 +222,38 @@ def write_missing_node_types(missing_node_types, truly_missing, missing_nodes_ou
         }, f_missing, indent=2)
     print(f"[Info] Wrote missing and truly missing node types to '{missing_nodes_output_path}'")
 
+def add_ng_blocks(first_data, ng_blocks):
+
+    for node_id in ng_blocks["ng_pattern_blocks"]:
+        node = ng_blocks["ng_pattern_blocks"][node_id]
+        node["Is_NodeGroup"] = True
+        node["Is_Pattern"] = True
+
+        first_data["Nodes"][node_id] = (node)
+
 def write_reordered_output(first_data, reordered_output_path):
     with open(reordered_output_path, 'w', encoding='utf-8') as f_out:
         json.dump(first_data, f_out, indent=2)
     print(f"[Info] Wrote reordered data to '{reordered_output_path}'")
 
 # Final run() function for the wrapper:
-def run(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, output_path):
+def run(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, ng_blocks_path, output_path):
     missing_nodes_output_path = os.path.splitext(output_path)[0] + "_missing_nodes.json"
 
-    first_data, second_data, blender_native_nodes, nodegroups_defs = load_json_files(
-        first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path)
+    first_data, second_data, blender_native_nodes, nodegroups_defs, ng_blocks = load_json_files(
+        first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, ng_blocks_path)
     update_node_types_from_second_data(second_data, first_data)
     enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups_defs)
-    reorder_all_nodes(first_data)
-    missing_node_types, truly_missing = collect_missing_node_types(first_data, blender_native_nodes, nodegroups_defs)
+    add_ng_block_data(first_data, ng_blocks)
 
+    missing_node_types, truly_missing = collect_missing_node_types(first_data, blender_native_nodes, nodegroups_defs)
     if truly_missing:
         write_missing_node_types(missing_node_types, truly_missing, missing_nodes_output_path)
     else:
         print("[Info] No missing node types found.")
 
+    add_ng_blocks(first_data, ng_blocks)
+    reorder_all_nodes(first_data)
     write_reordered_output(first_data, output_path)
 
 # Optional CLI (won't interfere with wrapper)
@@ -210,14 +261,17 @@ if __name__ == "__main__":
     import sys
     import os
 
-    if len(sys.argv) < 6:
-        print("Usage: python LSMG_stage5_merge_2and5_final_output.py <stage2.json> <stage4.json> <blender_native.json> <nodegroups.json> <output.json>")
+    if len(sys.argv) < 7:
+        print("Usage: python LSMG_stage5_merge_2and5_final_output_ngblocks_01.py <stage2.json> <stage4.json> <blender_native.json> <nodegroups.json> <ng_blocks.json> <output.json>")
         sys.exit(1)
 
     first_data_path = sys.argv[1]
     second_data_path = sys.argv[2]
     blender_native_nodes_path = sys.argv[3]
     nodegroups_defs_path = sys.argv[4]
-    output_path = sys.argv[5]
+    ng_blocks_path = sys.argv[5]
+    output_path = sys.argv[6]
 
-    run(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, output_path)
+    run(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, ng_blocks_path, output_path)
+
+##   python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_stage5_merge_2and5_final_output_ngblocks_vers.py" "F:\test\wrapper_script_test_output6\stage_2_tmp_CHAR_BASE_VT.json" "F:\test\wrapper_script_test_output6\stage_4_tmp_CHAR_BASE_VT.json" "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\blender_native_node_ref_2.json" "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\frame_exported_nodegroups_5.json" "F:\test\wrapper_script_test_output6\node_sequence_CHAR_BASE_VT_pseudonode_03.json" "F:\test\wrapper_script_test_output6\stage_5_output_w_node_sequence_CHAR_BASE_VT_02.json"
