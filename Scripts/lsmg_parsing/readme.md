@@ -249,3 +249,5 @@ Still todo:
 >  Finalise the Pattern generation process; still very manual and time consuming compared to other processes.
 >  More Patterns need to be written, see above.
 >  Need a proper document outlining which Templates have issues that require resolution. Most issues now are at the Template level, not the systemic.
+
+- harpoon
