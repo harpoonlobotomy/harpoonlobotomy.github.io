@@ -1,5 +1,8 @@
 title: harpoonLobotomy // BG3 Materials/Templates
 
+author:
+  name: harpoonLobotomy
+  
 description: Technical archaeology of Baldur’s Gate 3 - digging around in files, figuring out how to use them. With a specialisation in recreating materials in Blender, using their original nodegraphs blueprints.
 
 url: "https://harpoonlobotomy.github.io"
