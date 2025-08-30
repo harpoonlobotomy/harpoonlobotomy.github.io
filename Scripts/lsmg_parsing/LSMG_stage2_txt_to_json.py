@@ -56,6 +56,7 @@ def parse_blocks(blocks):
             node_name = None
             full_type = None
             node_type = None
+            node_label = None
             m_inputs_id = None
             m_inputs_size = None
             m_outputs_id = None
@@ -65,11 +66,14 @@ def parse_blocks(blocks):
 
             for line in lines:
                 # Extract node ID and type
-                if "<Node" in line and "z:Id=" in line:
+                if "<Node z:Id=" in line:
                     attrs = parse_attr(line)
                     node_id = attrs.get("z:Id")
                     full_type = attrs.get("i:type", "")
                     node_type = full_type.split(":")[-1] if ":" in full_type else full_type
+                    #if node_id == "704":
+                        #print(f"Checking if node description found for {node_id}: {line}")
+
 
                 elif "<Name" in line and "z:Id" in line and node_name is None:
                     node_name = re.sub(r"<.*?>", "", line).strip()
@@ -126,6 +130,10 @@ def parse_blocks(blocks):
                         #    print(f"  Attribute: {d2p1_attr}")
                             node["d2p1_attr"] = d2p1_attr
 
+                if "<NodeDescription" in line:
+                    #print(f"Node description found for {node_id}: {line}")
+                    node_label = re.sub(r"<.*?>", "", line).strip()
+
 
             if node_id:
                 if node_id not in nodes:
@@ -144,6 +152,9 @@ def parse_blocks(blocks):
                         "Internal_Connectors": internal_connectors,
                         "d2p1_Attributes": d2p1_attr
                     }
+                    if node_label:
+                        nodes[node_id]["Node_Description"] = node_label
+
                 else:
                     # Update only if missing
                     if node_name and not nodes[node_id].get("Node_Name"):
@@ -340,7 +351,7 @@ def patch_node_locations(blocks, nodes):
         location_y = None
 
         for line in lines:
-            if "<Node" in line and "z:Id=" in line:
+            if "<Node z:Id=" in line:
                 attrs = parse_attr(line)
                 node_id = attrs.get("z:Id")
 
@@ -360,7 +371,6 @@ def patch_node_locations(blocks, nodes):
                 "x": location_x,
                 "y": location_y
             }
-
 
 def patch_missing_connector_names(parsed):
     """

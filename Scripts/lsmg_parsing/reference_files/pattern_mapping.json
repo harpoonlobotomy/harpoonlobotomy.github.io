@@ -1,0 +1,153 @@
+{
+  "signvec_absvec": {
+    "principle_node_type": "AddNode",
+    "Links": [
+      [
+        "CombineNode[1]",
+        "Result",
+        "SubtractNode[1]",
+        "X"
+      ],
+      [
+        "MultiplyNode[1]",
+        "Result",
+        "AddNode[1]",
+        "X"
+      ],
+      [
+        "CombineNode[2]",
+        "Result",
+        "SubtractNode[2]",
+        "X"
+      ],
+      [
+        "SubtractNode[2]",
+        "Result",
+        "SignNode[2]",
+        "Value"
+      ],
+      [
+        "SubtractNode[1]",
+        "Result",
+        "SignNode[1]",
+        "Value"
+      ],
+      [
+        "SignNode[1]",
+        "Result",
+        "MaxNode[1]",
+        "X"
+      ],
+      [
+        "SignNode[2]",
+        "Result",
+        "MaxNode[1]",
+        "Y"
+      ],
+      [
+        "ConstantVector4Node[1]",
+        "Output",
+        "SubtractNode[1]",
+        "X"
+      ],
+      [
+        "SubtractNode[1]",
+        "Result",
+        "AbsNode[1]",
+        "Value"
+      ],
+      [
+        "AbsNode[1]",
+        "Result",
+        "MaxNode[2]",
+        "X"
+      ],
+      [
+        "MaxNode[2]",
+        "Result",
+        "MultiplyNode[1]",
+        "Y"
+      ],
+      [
+        "ConstantVector4Node[1]",
+        "Output",
+        "SubtractNode[2]",
+        "X"
+      ],
+      [
+        "SubtractNode[2]",
+        "Result",
+        "AbsNode[2]",
+        "Value"
+      ],
+      [
+        "AbsNode[2]",
+        "Result",
+        "MaxNode[2]",
+        "Y"
+      ]
+    ]
+  },
+  "blood_dirt_bruises_sweat_4ch_body": {
+    "principle_node_type": "PowerNode",
+    "NG_Details": {
+      "name": "blood_dirt_bruises_sweat_4ch",
+      "color": "purple",
+      "sockets": {
+        "inputs": {},
+        "outputs": {}
+      }
+    },
+    "Links": [
+      ["CombineNode[2]", "Result", "MultiplyNode[1]", "X"],
+      ["MultiplyNode[1]", "Result", "ConstantClampNode[1]", "Value"],
+      ["CombineNode[1]", "Result", "SubtractNode[1]", "X"],
+      ["OneMinusNode[1]", "Output", "SubtractNode[1]", "Y"],
+      ["SubtractNode[1]", "Result", "ConstantClampNode[2]", "Value"],
+      ["ConstantClampNode[2]", "Result", "DivideNode[1]", "X"],
+      ["ConstantClampNode[3]", "Result", "DivideNode[1]", "Y"],
+      ["DivideNode[1]", "Result", "PowerNode[1]", "Value"],
+      ["PowerNode[1]", "Result", "MultiplyNode[2]", "X"],
+      ["ConstantClampNode[1]", "Result", "MultiplyNode[2]", "Y"],
+      ["MultiplyNode[2]", "Result", "PassthroughNode[1]", "Value"],
+      ["CombineNode[2]", "Result", "OneMinusNode[1]", "Input"],
+      ["CombineNode[2]", "Result", "ConstantClampNode[3]", "Value"],
+      ["CombineNode[3]", "Result", "PowerNode[1]", "Power"]
+    ]
+  },
+  "VT_Layers_4ch": {
+    "principle_node_type": "CombineNode",
+    "Links": [
+		["LengthNode[1]", "Result", "CombineNode[1]", "Value2"],
+		["LengthNode[2]", "Result", "CombineNode[1]", "Value3"],
+		["ConstantFloatNode[1]", "Output", "SquareRootNode[1]", "Value"],
+		["SquareRootNode[1]", "Result", "DivideNode[1]", "Y"],
+		["SubtractNode[5]", "Result", "ConstantClampNode[1]", "Value"],
+		["ConstantClampNode[1]", "Result", "DivideNode[2]", "X"],
+		["ComponentMaskNode_XYZ[3]", "Result", "MultiplyNode[3]", "Y"],
+		["DivideNode[2]", "Result", "ComponentMaskNode_W", "Value"],
+		["ComponentMaskNode_W", "Result", "MultiplyNode[4]", "X"],
+		["ComponentMaskNode_XYZ[4]", "Result", "MultiplyNode[4]", "Y"],
+		["MultiplyNode[4]", "Result", "AddNode[2]", "Y"],
+		["DivideNode[2]", "Result", "ComponentMaskNode_X", "Value"],
+		["ComponentMaskNode_X", "Result", "MultiplyNode[1]", "X"],
+		["ComponentMaskNode_XYZ[1]", "Result", "MultiplyNode[1]", "Y"],
+		["MultiplyNode[1]", "Result", "AddNode[1]", "X"],
+		["DivideNode[2]", "Result", "ComponentMaskNode_Y", "Value"],
+		["ComponentMaskNode_Y", "Result", "MultiplyNode[2]", "X"],
+		["ComponentMaskNode_XYZ[2]", "Result", "MultiplyNode[2]", "Y"],
+		["MultiplyNode[2]", "Result", "AddNode[1]", "Y"],
+		["MultiplyNode[3]", "Result", "AddNode[2]", "X"],
+		["ComponentMaskNode_Z", "Result", "MultiplyNode[3]", "X"],
+		["DivideNode[2]", "Result", "ComponentMaskNode_Z", "Value"],
+		["ConstantFloatNode[2]", "Output", "DivideNode[2]", "Y"],
+		["ConstantFloatNode[2]", "Output", "OneMinusNode[2]", "Input"],
+		["OneMinusNode[2]", "Output", "SubtractNode[5]", "Y"],
+		["OneMinusNode[1]", "Output", "SubtractNode[5]", "X"],
+		["DivideNode[1]", "Result", "OneMinusNode[1]", "Input"],
+		["CombineNode[1]", "Result", "DivideNode[1]", "X"],
+		["LengthNode[3]", "Result", "CombineNode[1]", "Value1"],
+		["LengthNode[4]", "Result", "CombineNode[1]", "Value4"]
+	]
+  }
+}

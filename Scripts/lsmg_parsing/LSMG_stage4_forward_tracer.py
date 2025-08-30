@@ -1,11 +1,7 @@
-## actually works. correct linecount, recognises behaviour, exception for (currently only)
-## image texture nodes have socket-specific output.
 ## correctly identifies the componentmasknode data_type by checking the name suffix (x/xy/etc)
 
-
-## Need to add the function of it checking if an image texture node has a uv input (used), and if so, use the 'w/uv' version of the image texture group.
-##Also need to add reverse tracking for 'componentmask_w'; I can't get A from RGB or 4-channel vector, so need to pipe this directly. Maybe add this at the
-# mat-gen stage instead of here, but noting it here anyway.
+## written for Blender 4.3
+# - harpoonlobotomy
 
 import json
 from collections import defaultdict, deque
@@ -16,12 +12,15 @@ node_type_behaviour = {
     "DotNode": "scalar",
     "DesaturationNode": "color",
     "CombineNode": "vector",
+    "ConstantFloatNode": "scalar",
     "UV": "vector",
+    "LengthNode": "scalar",
     "normal": "vector",
     "Texture2DNode": "color",
+    "ConstantVector2Node": "vector",
     "ConstantVector3Node": "color",
-    "position": "vector",
-    "LengthNode": "scalar"
+    "ConstantVector4Node": "vector",
+    "position": "vector"
 }
 
 enum_behaviour = {
@@ -32,7 +31,7 @@ enum_behaviour = {
 }
 
 def socket_name_behaviour(socket_names):
-    color_sockets = {"rgb", "rgba", "color"}
+    color_sockets = {"rgb", "rgba", "color", "albedo"}
     normalized = {s.lower() for s in socket_names if s}
     if normalized & color_sockets:
         return "color"
@@ -157,6 +156,22 @@ def iterative_type_propagation(chains, locked_nodes, node_data_type_map):
                 conn.get("From_Internal_Socket", "")
             }
 
+
+            # Enum override, with Color heuristic
+            enum_override_type = enum_behaviour.get(enum.lower())
+            if enum_override_type:
+                if "_color" in from_node_type.lower():
+                    connection_type = "color"
+                if "Vector4" in from_node_type.lower():
+                    connection_type = "vector"
+                else:
+                    connection_type = enum_override_type
+
+            # Special socket override (e.g., Texture2DNode heuristics)
+            override_type = override_type_by_socket(from_node_type, from_socket_names)
+            if override_type:
+                connection_type = override_type
+
             # Socket name override
             socket_override_type = socket_name_behaviour(from_socket_names)
             if socket_override_type:
@@ -165,15 +180,12 @@ def iterative_type_propagation(chains, locked_nodes, node_data_type_map):
             # Enum override, with Color heuristic
             enum_override_type = enum_behaviour.get(enum.lower())
             if enum_override_type:
-                if "color" in from_node_type.lower():
+                if "_color" in from_node_type.lower():
                     connection_type = "color"
+                if "Vector4" in from_node_type.lower():
+                    connection_type = "vector"
                 else:
                     connection_type = enum_override_type
-
-            # Special socket override (e.g., Texture2DNode heuristics)
-            override_type = override_type_by_socket(from_node_type, from_socket_names)
-            if override_type:
-                connection_type = override_type
 
             # Track input types
             node_input_types[to_node].append(connection_type)
@@ -278,12 +290,12 @@ def print_node_chain_summary(named_chains, data_types, chains):
             id_to_name[tid] = conn.get("To_Node_Type_Name", "")
 
     for label, node_ids in named_chains:
-        #print(f"\n--- Node Chain Summary: {label} ---")
+        print(f"\n--- Node Chain Summary: {label} ---")
         for nid in node_ids:
             name = id_to_name.get(nid, "UNKNOWN")
             dtype = data_types.get(nid, "scalar")
             tagged = append_type_to_node_name(name, dtype)
-            #print(f"{nid} > {name}")
+            print(f"{nid} > {name}")
 
 def run(input_file: str, output_file: str):
     with open(input_file, "r") as f:

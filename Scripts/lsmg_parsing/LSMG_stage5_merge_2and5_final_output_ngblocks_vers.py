@@ -1,4 +1,6 @@
-## !!!!!  The socket orders are wrong sometimes now, when they weren't before. Need to investigate before I do much else.
+## written for Blender 4.3
+# - harpoonlobotomy
+
 #C:\Users\Gabriel>python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_Skin_Body.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output" --start-at 1
 import json
 from collections import OrderedDict
@@ -15,22 +17,44 @@ SOCKET_MAP = {
         "Alpha": {"identifier": "Factor_Float", "index": 0},
         "X": {"identifier": "A_Vector", "index": 4},
         "Y": {"identifier": "B_Vector", "index": 5},
-        "Result": {"identifier": "Result_Vector", "index": 1}
+        "Result": {"identifier": "Result_Vector", "index": 1},
+        "MinOld": {"identifier": "From Min", "index": 1},
+        "MaxOld": {"identifier": "From Max", "index": 2},
+        "MinNew": {"identifier": "To Min", "index": 3},
+        "MaxNew": {"identifier": "To Max", "index": 4}
     },
     "VALUE": {
         "Alpha": {"identifier": "Factor_Float", "index": 0},
         "X": {"identifier": "A_Float", "index": 2},
         "Y": {"identifier": "B_Float", "index": 3},
-        "Result": {"identifier": "Result_Float", "index": 0}
+        "Result": {"identifier": "Result_Float", "index": 0},
+        "MinOld": {"identifier": "From_Min_FLOAT3", "index": 7},
+        "MaxOld": {"identifier": "From_Max_FLOAT3", "index": 8},
+        "MinNew": {"identifier": "To_Min_FLOAT3", "index": 9},
+        "MaxNew": {"identifier": "To_Max_FLOAT3", "index": 10}
     },
     "FLOAT": {
         "Alpha": {"identifier": "Factor_Float", "index": 0},
         "X": {"identifier": "A_Float", "index": 2},
         "Y": {"identifier": "B_Float", "index": 3},
-        "Result": {"identifier": "Result_Float", "index": 0}
+        "Result": {"identifier": "Result_Float", "index": 0},
+        "MinOld": {"identifier": "From_Min_FLOAT3", "index": 7},
+        "MaxOld": {"identifier": "From_Max_FLOAT3", "index": 8},
+        "MinNew": {"identifier": "To_Min_FLOAT3", "index": 9},
+        "MaxNew": {"identifier": "To_Max_FLOAT3", "index": 10}
     }
-
 }
+
+DEBUG_GROUPS = {
+    "ng_blocks": False
+}
+
+def debug_print(groups, *args, **kwargs): #             ---------- debug_print("nodegroup_creation", "Setting up node:")
+    if isinstance(groups, str):
+        groups = [groups]
+    if any(DEBUG_GROUPS.get(g, False) for g in groups):
+        print(*args, **kwargs)
+
 
 def load_json_files(first_data_path, second_data_path, blender_native_nodes_path, nodegroups_defs_path, ng_blocks_path):
     with open(first_data_path, "r", encoding="utf-8") as f1, \
@@ -88,12 +112,7 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
             continue
 
         node["Blender_type"] = blender_node.get("type")
-## # NOTE: 
-# replace with something like this: 11/8/25
-#            for key in optional_keys:
-#                if key in node_attrs:
-#                    int_node[key] = node_attrs[key]
-##
+
         if "blend_type" in blender_node:
             node["Blend_Type"] = blender_node.get("blend_type")
             node["Data_Type"] = blender_node.get("data_type")
@@ -112,13 +131,16 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
                 socket = blender_inputs_list[i]
                 conn["Socket_Identifier"] = socket.get("identifier")
                 conn["blender_index"] = socket.get("index")
+                conn['default_value'] = socket.get('default_value')
 
                 conn_name = conn.get("Conn_Name")  # <-- Fix is here
                 socket_info = SOCKET_MAP.get(data_type, {}).get(conn_name)
                 if socket_info:
-        #            print(f"{data_type}, {conn_name}")
+                    #print(f"{data_type}, {conn_name}")
                     conn["Socket_Identifier"] = socket_info["identifier"]
                     conn["blender_index"] = socket_info["index"]
+                    if "default_value" in socket_info:
+                        conn["default_value"] = socket_info["default_value"]
 
         blender_outputs_list = blender_node.get("outputs", [])
         connectors = node.get("m_Outputs", {}).get("Connectors", [])
@@ -131,7 +153,7 @@ def enhance_nodes_with_blender_info(first_data, blender_native_nodes, nodegroups
                 conn_name = conn.get("Conn_Name")  # <-- Fix is here
                 socket_info = SOCKET_MAP.get(data_type, {}).get(conn_name)
                 if socket_info:
-            #        print(f"{data_type}, {conn_name}")
+                    #print(f"{data_type}, {conn_name}")
                     conn["Socket_Identifier"] = socket_info["identifier"]
                     conn["blender_index"] = socket_info["index"]
                 # Handle special case: add default Factor input if missing
@@ -157,17 +179,22 @@ def add_ng_block_data(first_data, ng_blocks):
         if not node_id:
             continue
 
-        for group_id, group_data in ng_blocks["ng_nodes"].items():
-            for state in ["start", "end", "contained"]:
-                nodes_dict = group_data.get(state, {})
-                if node_id in nodes_dict:
-                    #print(f"NodeGroup Block ID: {group_id} // State: {state}")
-                    node["ng_block"] = group_id
-                    node["ng_block_role"] = nodes_dict[node_id]
-                    node["ng_block_state"] = state
-            else:
-                continue  # only runs if inner loop did NOT break
-            break  # stop searching other groups if matched
+        for pattern in ng_blocks:
+            patt_name = pattern
+            debug_print("ng_blocks", patt_name)
+
+            for group_id, group_data in ng_blocks[patt_name]["ng_nodes"].items():
+                debug_print("ng_blocks", group_id)
+                for state in ["start", "end", "contained"]:
+                    nodes_dict = group_data.get(state, {})
+                    if node_id in nodes_dict:
+                        debug_print("ng_blocks", f"NodeGroup Block ID: {group_id} // State: {state}")
+                        node["ng_block"] = group_id
+                        node["ng_block_role"] = nodes_dict[node_id]
+                        node["ng_block_state"] = state
+                else:
+                    continue  # only runs if inner loop did NOT break
+                break  # stop searching other groups if matched
 
 def reorder_node_fields(node):
     desired_order = [
@@ -224,12 +251,17 @@ def write_missing_node_types(missing_node_types, truly_missing, missing_nodes_ou
 
 def add_ng_blocks(first_data, ng_blocks):
 
-    for node_id in ng_blocks["ng_pattern_blocks"]:
-        node = ng_blocks["ng_pattern_blocks"][node_id]
-        node["Is_NodeGroup"] = True
-        node["Is_Pattern"] = True
+    for pattern in ng_blocks:
+        patt_name = pattern
+        #print(f"Pattern name found in NG BLocks: {patt_name}")
 
-        first_data["Nodes"][node_id] = (node)
+        for node_id in ng_blocks[patt_name]["ng_pattern_blocks"]:
+            debug_print("ng_blocks", node_id)
+            node = ng_blocks[patt_name]["ng_pattern_blocks"][node_id]
+            node["Is_NodeGroup"] = True
+            node["Is_Pattern"] = True
+
+            first_data["Nodes"][node_id] = (node)
 
 def write_reordered_output(first_data, reordered_output_path):
     with open(reordered_output_path, 'w', encoding='utf-8') as f_out:

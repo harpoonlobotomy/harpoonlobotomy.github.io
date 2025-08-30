@@ -5,7 +5,11 @@ This document outlines the five-stage processing pipeline used to convert raw LS
 In brief summary: If you give it a BG3 LSMG (material template) file, it will produce a JSON file that can be used in Blender (with the appropriate companion script in Blender) to rebuild a nodegraph.
 Also potentially works with other UE4-based material nodegraphs' XML-like documents, but this is untested.
 
--harpoon
+These scripts are all triggered as needed from within the Material_Generator script if run in Blender; it will find the required template file, trigger file generation, etc. Alternatively, the process can be triggered manually via CLI, with some scripts also able to run independently outside of this process entirely.
+
+I believe this document is up to date as of 30/8/25.
+
+-harpoonLobotomy
 
 
  -----
@@ -23,32 +27,47 @@ Also potentially works with other UE4-based material nodegraphs' XML-like docume
 
 # Stage 4: LSMG_stage4_forward_tracer.py
     Input example: stage_3_tmp_CHAR_Fur.json
-    Output example: stage_4_tmp_CHAR_Fur.json
+		*Supplementary:
+			`pattern_mapping.json`
+			`nodesequence_tracer_pseudonode_cli.py`
+	Output example: stage_4_tmp_CHAR_Fur.json
+		*Supplementary:
+			`ng_blocks_tmp_CHAR_Fur.json` if any Pattern is found.
 
-`( Stage 4.5: Getting nodes/sockets.
-    Run `BLENDER_export_native_node_data.py` to get native sockets.
-    (Key names should match the LSMG node_type.)
-
-    For nodegroups, run `BLENDER_export_frames_for_nodegroup_gen_to_json.py`,
-    with frame names as the node_type.
-    See `Core_Script_Overview.md` for slightly more detail. )`
+	[Note: Use of Patterns is on by default, can be turned off with cli command `--disabled_patterns`]
+	
 
 # Stage 5: LSMG_stage5_merge_2and5_final_output_ngblocks_vers.py
     Input Example:
         `stage_2_tmp_CHAR_Fur.json`
         `stage_4_tmp_CHAR_Fur.json`
-        `blender_native_node_ref.json`
-        `blender_exported_nodegroups_for_gen`
+        `native_node_ref.json`
+        `nodegroup_blueprints.json`
+		* Supplementary:
+			`ng_blocks_tmp_CHAR_Fur.json` if Pattern was found.
     Output Example: `stage_5_tmp_CHAR_Fur.json`
 	* Will also produce a _missing_nodes.json if any missing nodes are found.
-	*	Note: These files are input automatically by the wrapper, and do not need to be separately added. Any file locations/folders are provided at the Wrapper level.
-	*	Currently, only the LSMG file and the script are given as CLI commands.
+
 ---
 
 # Wrapper: LSMG_5Stage_Wrapper_jsonvers.py
-	Input example: CHAR_Fur.lsmg
-		* + native_node_ref and frame_exported_nodegroups
-	Output example: stage_5_tmp.json
+    Input example: CHAR_Fur.lsmg
+      * + `native_node_ref.json` and `nodegroup_blueprints.json`
+    Output example: stage_5_tmp.json
+
+# Supplementary files:
+    For native_node_ref:
+      Run `BLENDER_export_native_node_data.py`.
+    (Key names should match the LSMG node_type.)
+
+    For nodegroups:
+    Once nodegroups are created and present in Blender file, make that material Active and applied the the Active object.
+      Run `BLENDER_export_nodegroup_data_whole.py`.
+
+    For Patterns:
+      `node_sequencer_shorthand_converter.py` can be used to assist, but socket & node names must be changed to match the input JSON; this is not yet automated.
+      Pattern sequences must match exactly or the pattern will fail; this is intentional to reduce the chance of false positives, as those would be very bad.
+      Patterns currently require the most hand-authoring of any part of the process. When the Pattern is finalised, and Pattern nodegroup provided in Nodegroup Blueprints .json, no futher manual intervention is required.
 
 
 ## Stage 1 – Block Compression (Lexical Preprocessing)
@@ -58,11 +77,11 @@ Break the raw, non-XML-parseable file into discrete structural blocks.
 
 **Challenges:**
 - The file resembles XML but is malformed and deeply nested.
-- Single nodes can span hundreds of lines.
+- Single nodes can span many hundreds of lines.
 - Requires manual nesting compression and block recognition.
 
 **Outcome:**
-- Each logical block (e.g. one node, or a connection) is compressed into a small number of lines.
+- Each logical block (e.g. one node, or one to/from connection) is compressed into a small number of lines, isolated from the nesting.
 - Output is a cleaned-up list of blocks ready for parsing.
 
 ---
@@ -109,11 +128,17 @@ Perform **forward-tracing data type inference** along chains.
   - Enum-based nodes (e.g. Mix, Clamp)
   - Node-specific type exceptions (e.g. DotProduct always outputs Scalar)
   - Socket-specific overrides where applicable
+- If not disabled, apply Pattern data to chains:
+  - Amend node data, and create 'pseudonodes' to replace 'Pattern chains'.
+  - `Pattern chains` are sequences of nodes that are impossible to replicate accurately within blender natively.
+  - Where a Pattern Blueprint exists to replicate that function, it is inserted in the final nodegraph, replacing the original nodebranch section and taking on its connections.
 
 **Output:**
 - A new JSON structure mapping:
   - Each node to its inferred **data type**
   - Each chain to its **typed flow path**
+- A Pattern JSON, if any pattern is found.
+  - The Pattern JSON is used by the later script to identify the Pattern 'state' of nodes, to determine if they should be instanced or not and how their connection (input or output) should be passed on.
 
 ---
 
@@ -134,14 +159,15 @@ Combine raw node metadata with discovered data types to produce a Blender-usable
   - Node operations (e.g. Multiply, Dot Product)
   - Mix Node blend_type and data_type (Eg 'Color, Multiply' for 'Mix Color' set to 'Multiply')
   - Nodegroup replacements where needed (e.g. custom 'Power_vector')
+  - If relevant, Pattern role per node.
 
 **Output:**
 - A fully enriched JSON representation of the nodegraph:
   - Accurate data types at node and socket level
   - Identified Blender node classes or nodegroup substitutes
   - Connection structure ready for Blender import
-  - Also supports nodeblock replacement - for specific sequences where accurate nodebranch replication is impossible due to blender limitations (eg 4 channel vectors).
-		The node sequence generator will add flags to affected nodes, which will then be read by the template generator in Blender where they will be replaced by a custom nodegroup that accurately replicates the function.
+  - Nodeblock replacement data
+
 
 ---
 
@@ -207,3 +233,19 @@ Updated everything, again. Nodegroup blocks are now completely integrated into t
 Also added a nodegroup writer script, so you can provide nodegroup details and desired links in specific shorthand and it will generate the framed_nodegroups JSON output format, to avoid the 'frame' framework if desired. 
 
 - harpoon
+
+----
+
+30/8/25
+Updated everything again. Patterns are now fully integrated into the pipeline. Full script call integration is also achieved - only Matgen needs to be present in Blender. When run, if the Template is not found in the Blend, it will call Template_Generator. Template_Generator will look for the stage5 output file - if not found, it will call the wrapper script and produce the file automatically, at which point Template_Generator and Material_Generator will both run.
+
+Added the ability to apply materials to multiple selected objects, instead of having to run them one at a time per asset.
+Implemented reroute-skips, adding more flexibility for connecting to _Alpha and _W sockets for ComponentMask_W nodes.
+Implemented material-level UV Map indexes, so reusing a template on a different asset no longer requires manual UV Map realignment.
+Template_Generator now adds template-level image textures, and Material_Generator only adds images/parameters flagged as 'Enabled' for that material.
+
+Still todo:
+>  Recursive nodegroups; currently nodegroups can only be created at the 'top level', and inside of other nodegroups.
+>  Finalise the Pattern generation process; still very manual and time consuming compared to other processes.
+>  More Patterns need to be written, see above.
+>  Need a proper document outlining which Templates have issues that require resolution. Most issues now are at the Template level, not the systemic.

@@ -1,10 +1,11 @@
-## To run:
+## Parses and processes .LSMG (material nodegraph) files from Baldur's Gate 3, into a form that Blender can read, using multiple scripts and supplementary files.
 
-# python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\InstancePaint\IP_Wind_GrassFlowers_AlphaTest_2S_PBR_VT.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output4" --start-at 3
-## command prompt: python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_json_not_txt.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_Fur.lsmg" --named-temp --temp-dir "F:\test\wrapper_script_test_output3"
-#or
-## command prompt: python LSMG_5Stage_Wrapper.py CHAR_Fur.lsmg --temp-dir wrapper_script_test_output
-#python "F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "Public/" --named-temp --temp-dir "F:\test\wrapper_script_test_output4" --start-at 3
+## To run:
+#python "F:\Python_Scripts\Template_Generator\LSMG_5Stage_Wrapper_NG_Blocks_vers.py" "D:\Steam\steamapps\common\Baldurs Gate 3\Data\Editor\Mods\Shared\Assets\Materials\Characters\CHAR_BASE_VT.lsmg" --named-temp --temp-dir "F:\test\new_pattern" --start-at 1
+
+#Created over July and August 2025
+# - harpoonlobotomy
+
 import os
 import sys
 import importlib.util
@@ -14,6 +15,13 @@ import argparse
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def import_script(script_filename, module_name):
+    if ".py" not in str(script_filename):
+        print()
+        print(f"WARNING:: The filename, {script_filename}, doesn't have 'py' in it. Might want to check that...")
+        print()
+        script_filename = script_filename + ".py"
+        print(f"Using new script filename; good luck. {script_filename}")
+
     script_path = os.path.join(SCRIPT_DIR, script_filename)
     spec = importlib.util.spec_from_file_location(module_name, script_path)
     module = importlib.util.module_from_spec(spec)
@@ -26,19 +34,18 @@ def make_temp_path(stage_name, input_basename, use_named_tmp, temp_dir, ext=".js
     else:
         return os.path.join(temp_dir, f"{stage_name}_tmp{ext}")
 
-def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_outputs", stages_to_run={1, 2, 3, 4, 5}):
+def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_outputs", stages_to_run={1, 2, 3, 4, 5}, disable_patterns=False):
     import os
     os.makedirs(temp_dir, exist_ok=True)
     base_name = os.path.splitext(os.path.basename(input_lsmg_path))[0]
 
     # Import all stage scripts from SCRIPT_DIR
     LSMG_stage1_xml_block_extractor = import_script("LSMG_stage1_xml_block_extractor.py", "stage1")
-    LSMG_stage2_txt_to_json = import_script("LSMG_stage2_txt_to_json_2_test.py", "stage2")
+    LSMG_stage2_txt_to_json = import_script("LSMG_stage2_txt_to_json.py", "stage2")
     LSMG_stage3_chains_from_json = import_script("LSMG_stage3_chains_from_json.py", "stage3")
     ng_blocks = import_script("nodesequence_tracer_pseudonode_cli.py", "ng_blocks")
     LSMG_stage4_forward_tracer = import_script("LSMG_stage4_forward_tracer.py", "stage4")
     LSMG_stage5_merge_2and5_final_output = import_script("LSMG_stage5_merge_2and5_final_output_ngblocks_vers.py", "stage5")
-
 
     # Stage 1
     txt_out = make_temp_path("stage_1", base_name, use_named_tmp, temp_dir, ext=".txt")
@@ -68,15 +75,21 @@ def run_pipeline(input_lsmg_path, use_named_tmp=True, temp_dir="temp_pipeline_ou
     json4_out = make_temp_path("stage_4", base_name, use_named_tmp, temp_dir)
     ng_blocks_out = make_temp_path("ng_blocks", base_name, use_named_tmp, temp_dir)
     if 4 in stages_to_run:
-        ng_blocks.run(json3_out, ng_blocks_out),
+        if disable_patterns:
+            print("disable_patterns is True; not applying pattern data this run.")
+            pattern_data_path = "blank_for_test.json" # <-- blank file for no patterns testing. Cannot currently switch patterns 'off' otherwise.
+        else:
+            print("Using pattern data.")
+            pattern_data_path = "pattern_mapping.json" # <-- current full file
+        ng_blocks.run(json3_out, ng_blocks_out, pattern_data_path),
         LSMG_stage4_forward_tracer.run(json3_out, json4_out)
         print(f"{base_name} Stage Four completed.")
     else:
         print(f"{base_name} Skipping Stage Four.")
 
     # Stage 5 (with bundled reference files)
-    blender_ref = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\blender_native_node_ref_2.json"
-    exported_groups = r"F:\Python_Scripts\LSMG_scripts\FINAL_LSMG_to_JSON_for_CLI\frame_exported_nodegroups_6.json"
+    blender_ref = "native_node_ref.json"
+    exported_groups = "nodegroup_blueprints.json"
     final_out = make_temp_path("stage_5", base_name, use_named_tmp, temp_dir)
 
     if 5 in stages_to_run:
@@ -99,12 +112,13 @@ if __name__ == "__main__":
     parser.add_argument("--temp-dir", default="temp_pipeline_outputs", help="Folder to store temporary/intermediate outputs")
     parser.add_argument("--start-at", type=int, default=1, help="Stage number to start at (inclusive)")
     parser.add_argument("--skip-stages", default="", help="Comma-separated list of stages to skip (e.g. 1,2)")
+    parser.add_argument("--disable_patterns", default="", help="`True` will not use patterns during processing.") ## add "--disable_patterns True" to disable patterns.
 
     args = parser.parse_args()
     print("Args received:", vars(args))
     all_stages = {1, 2, 3, 4, 5}
 
-    # Parse skip stages, ignoring empty strings
+    # Parser to skip stages, ignoring empty strings
     skip_stages = set()
     if args.skip_stages.strip():
         skip_stages = set(int(s) for s in args.skip_stages.split(",") if s.strip().isdigit())
@@ -120,5 +134,6 @@ if __name__ == "__main__":
         args.input_file,
         use_named_tmp=args.named_temp,
         temp_dir=args.temp_dir,
-        stages_to_run=stages_to_run
+        stages_to_run=stages_to_run,
+        disable_patterns=args.disable_patterns
     )

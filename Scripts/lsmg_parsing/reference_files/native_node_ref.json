@@ -113,6 +113,87 @@
     ],
     "type": "ShaderNodeVectorMath"
   },
+  "CeilNode": {
+    "autohide": true,
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "CEIL",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "CeilNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "CEIL",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "ClampNode": {
+    "autohide": true,
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Min",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_002",
+        "index": 2,
+        "is_linked": true,
+        "name": "Max",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result",
+        "index": 0,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeClamp"
+  },
   "CombineNode_vector": {
     "autohide": true,
     "inputs": [
@@ -198,6 +279,41 @@
     ],
     "type": "ShaderNodeRGB"
   },
+  "ConstantVector3Node_vector": {
+    "inputs": [
+      {
+        "identifier": "X",
+        "index": 0,
+        "is_linked": true,
+        "name": "X",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Y",
+        "index": 1,
+        "is_linked": true,
+        "name": "Y",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Z",
+        "index": 2,
+        "is_linked": true,
+        "name": "Z",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeCombineXYZ"
+  },
   "DivideNode": {
     "autohide": true,
     "inputs": [
@@ -227,6 +343,36 @@
       }
     ],
     "type": "ShaderNodeMath"
+  },
+  "DivideNode_color": {
+    "blend_type": "DIVIDE",
+    "data_type": "RGBA",
+    "inputs": [
+      {
+        "identifier": "A_Color",
+        "index": 6,
+        "is_linked": true,
+        "name": "A",
+        "type": "RGBA"
+      },
+      {
+        "identifier": "B_Color",
+        "index": 7,
+        "is_linked": true,
+        "name": "B",
+        "type": "RGBA"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Color",
+        "index": 2,
+        "is_linked": true,
+        "name": "Result",
+        "type": "RGBA"
+      }
+    ],
+    "type": "ShaderNodeMix"
   },
   "DivideNode_vector": {
     "autohide": true,
@@ -288,6 +434,109 @@
     ],
     "type": "ShaderNodeVectorMath"
   },
+  "FModNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "MODULO",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "FloorNode": {
+    "autohide": true,
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "FLOOR",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "FracNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "FRACT",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "GreaterThanNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "GREATER_THAN",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
   "LengthNode": {
     "autohide": true,
     "inputs": [
@@ -310,6 +559,28 @@
       }
     ],
     "type": "ShaderNodeVectorMath"
+  },
+  "LessThanNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "LESS_THAN",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
   },
   "LinearInterpolateNode": {
     "blend_type": "MIX",
@@ -385,7 +656,7 @@
     ],
     "type": "ShaderNodeMix"
   },
- "LinearInterpolateNode_vector": {
+  "LinearInterpolateNode_vector": {
     "blend_type": "MIX",
     "data_type": "VECTOR",
     "inputs": [
@@ -451,6 +722,188 @@
       }
     ],
     "type": "ShaderNodeMath"
+  },
+  "MaxNode_color": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "MAXIMUM",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "MaxNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "MAXIMUM",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "MinNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "MINIMUM",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "MinNode_color": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "MINIMUM",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "MinNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "MINIMUM",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
+  },
+  "Mix_vector": {
+    "blend_type": "MIX",
+    "data_type": "VECTOR",
+    "inputs": [
+      {
+        "identifier": "Factor_Float",
+        "index": 0,
+        "is_linked": true,
+        "name": "Factor",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "A_Vector",
+        "index": 4,
+        "is_linked": true,
+        "name": "A",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "B_Vector",
+        "index": 5,
+        "is_linked": true,
+        "name": "B",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result_Vector",
+        "index": 1,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeMix"
   },
   "MultiplyNode": {
     "autohide": true,
@@ -550,6 +1003,35 @@
     ],
     "type": "ShaderNodeVectorMath"
   },
+  "NegateNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "MULTIPLY",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
   "NodeReroute": {
     "inputs": [
       {
@@ -557,7 +1039,7 @@
         "index": 0,
         "is_linked": true,
         "name": "Input",
-        "type": "VALUE"
+        "type": "VECTOR"
       }
     ],
     "outputs": [
@@ -566,7 +1048,7 @@
         "index": 0,
         "is_linked": true,
         "name": "Output",
-        "type": "VALUE"
+        "type": "VECTOR"
       }
     ],
     "type": "NodeReroute"
@@ -812,6 +1294,56 @@
     ],
     "type": "ShaderNodeMath"
   },
+  "RemapNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result",
+        "index": 0,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMapRange"
+  },
+  "RemapNode_vector": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Value_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "FRACT",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
   "ShaderNodeAttribute": {
     "inputs": [],
     "outputs": [
@@ -970,6 +1502,83 @@
     ],
     "type": "ShaderNodeInvert"
   },
+  "ShaderNodeMapRange": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "From Min",
+        "index": 1,
+        "is_linked": true,
+        "name": "From Min",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "From Max",
+        "index": 2,
+        "is_linked": true,
+        "name": "From Max",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Vector",
+        "index": 6,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "From_Min_FLOAT3",
+        "index": 7,
+        "is_linked": true,
+        "name": "From Min",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "From_Max_FLOAT3",
+        "index": 8,
+        "is_linked": true,
+        "name": "From Max",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "To_Min_FLOAT3",
+        "index": 9,
+        "is_linked": true,
+        "name": "To Min",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "To_Max_FLOAT3",
+        "index": 10,
+        "is_linked": true,
+        "name": "To Max",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result",
+        "index": 0,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "Vector",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeMapRange"
+  },
   "ShaderNodeMapping": {
     "inputs": [
       {
@@ -998,7 +1607,7 @@
     ],
     "type": "ShaderNodeMapping"
   },
-  "ShaderNodeMath_GREATER_THAN": {
+  "ShaderNodeMath_ADD": {
     "inputs": [
       {
         "identifier": "Value",
@@ -1015,39 +1624,8 @@
         "type": "VALUE"
       }
     ],
-    "operation": "GREATER_THAN",
-    "outputs": [
-      {
-        "identifier": "Value",
-        "index": 0,
-        "is_linked": true,
-        "name": "Value",
-        "type": "VALUE"
-      }
-    ],
-    "type": "ShaderNodeMath"
-  },
-  "SquareRootNode": {
-	"autohide": true,
-    "inputs": [
-      {
-        "identifier": "Value",
-        "index": 0,
-        "is_linked": true,
-        "name": "Value",
-        "type": "VALUE"
-      }
-    ],
-    "operation": "SQRT",
-    "outputs": [
-      {
-        "identifier": "Value",
-        "index": 0,
-        "is_linked": true,
-        "name": "Value",
-        "type": "VALUE"
-      }
-    ],
+    "operation": "ADD",
+    "outputs": [],
     "type": "ShaderNodeMath"
   },
   "ShaderNodeNewGeometry": {
@@ -1191,13 +1769,6 @@
     "inputs": [],
     "outputs": [
       {
-        "identifier": "Generated",
-        "index": 0,
-        "is_linked": true,
-        "name": "Generated",
-        "type": "VECTOR"
-      },
-      {
         "identifier": "UV",
         "index": 2,
         "is_linked": true,
@@ -1261,8 +1832,160 @@
     "outputs": [],
     "type": "ShaderNodeWavelength"
   },
+  "SignNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "SIGN",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
+  "SmoothStepNode": {
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "From Min",
+        "index": 1,
+        "is_linked": true,
+        "name": "From Min",
+        "type": "VALUE"
+      },
+      {
+        "identifier": "From Max",
+        "index": 2,
+        "is_linked": true,
+        "name": "From Max",
+        "type": "VALUE"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Result",
+        "index": 0,
+        "is_linked": true,
+        "name": "Result",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMapRange"
+  },
+  "SmoothStepNode_vector": {
+    "data_type": "FLOAT_VECTOR",
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 6,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "From_Min_FLOAT3",
+        "index": 7,
+        "is_linked": true,
+        "name": "From Min",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "From_Max_FLOAT3",
+        "index": 8,
+        "is_linked": true,
+        "name": "From Max",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeMapRange"
+  },
+  "SmoothStepNode_color": {
+    "data_type": "FLOAT_VECTOR",
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 6,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "From_Min_FLOAT3",
+        "index": 7,
+        "is_linked": true,
+        "name": "From Min",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "From_Max_FLOAT3",
+        "index": 8,
+        "is_linked": true,
+        "name": "From Max",
+        "type": "VECTOR"
+      }
+    ],
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeMapRange"
+  },
+  "SquareRootNode": {
+    "autohide": true,
+    "inputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "operation": "SQRT",
+    "outputs": [
+      {
+        "identifier": "Value",
+        "index": 0,
+        "is_linked": true,
+        "name": "Value",
+        "type": "VALUE"
+      }
+    ],
+    "type": "ShaderNodeMath"
+  },
   "SubtractNode": {
-	"autohide": true,
+    "autohide": true,
     "inputs": [
       {
         "identifier": "Value",
@@ -1290,36 +2013,6 @@
       }
     ],
     "type": "ShaderNodeMath"
-  },
-  "SubtractNode_vector": {
-	"autohide": true,
-    "inputs": [
-      {
-        "identifier": "Vector",
-        "index": 0,
-        "is_linked": true,
-        "name": "Vector",
-        "type": "VECTOR"
-      },
-      {
-        "identifier": "Vector_001",
-        "index": 1,
-        "is_linked": true,
-        "name": "Vector",
-        "type": "VECTOR"
-      }
-    ],
-    "operation": "SUBTRACT",
-    "outputs": [
-      {
-        "identifier": "Vector",
-        "index": 0,
-        "is_linked": true,
-        "name": "Vector",
-        "type": "VECTOR"
-      }
-    ],
-    "type": "ShaderNodeVectorMath"
   },
   "SubtractNode_color": {
     "autohide": true,
@@ -1358,5 +2051,35 @@
       }
     ],
     "type": "ShaderNodeMix"
+  },
+  "SubtractNode_vector": {
+    "autohide": true,
+    "inputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      },
+      {
+        "identifier": "Vector_001",
+        "index": 1,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "operation": "SUBTRACT",
+    "outputs": [
+      {
+        "identifier": "Vector",
+        "index": 0,
+        "is_linked": true,
+        "name": "Vector",
+        "type": "VECTOR"
+      }
+    ],
+    "type": "ShaderNodeVectorMath"
   }
 }
