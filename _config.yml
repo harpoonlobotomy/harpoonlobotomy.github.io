@@ -1,14 +1,27 @@
 title: harpoonLobotomy // BG3 Materials/Templates
 
-author:
-  name: harpoonLobotomy
-  
+author: harpoonLobotomy
+
 description: Technical archaeology of Baldur’s Gate 3 - digging around in files, figuring out how to use them. With a specialisation in recreating materials in Blender, using their original nodegraphs blueprints.
 
 url: "https://harpoonlobotomy.github.io"
 baseurl: ""
 
 theme: minima
+
+minima:
+
+  skin: solarized-light
+
+  show_excerpts: true
+
+  social_links:
+    - title: Youtube
+      icon: youtube
+      url: "https://youtube.com/@harpoonlobotomy?si=ekZuphjm20mLuT42"
+
+header_pages:
+  - Scripts/lsmg_parsing/readme.md
 
 show_downloads: false
 google_analytics: ""
@@ -17,18 +30,3 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   
-minima:
-  skin: solarized-light
-
-  show_excerpts: true
-
-  social_links:
-    - title: Minima Theme repository at GitHub
-      icon: github
-      url: "https://github.com/jekyll/minima"
-    - title: Jekyll at X (formerly Twitter)
-      icon: x-twitter
-      url: "https://x.com/jekyllrb" 
-
-header_pages:
-  - Scripts/lsmg_parsing/readme.md
