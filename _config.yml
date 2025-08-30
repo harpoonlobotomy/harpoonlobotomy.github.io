@@ -1,0 +1,20 @@
+title: BG3 Material Forensics
+author:
+  name: harpoonLobotomy
+  
+description: Technical archaeology of Baldur’s Gate 3 - digging around in files, figuring out how to use them. With a specialisation in recreating materials in Blender, using their original nodegraphs blueprints...
+
+url: "https://harpoonlobotomy.github.io"
+baseurl: ""
+
+theme: minima
+
+show_downloads: false
+google_analytics: ""
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  
+minima:
+  skin: solarized-light
